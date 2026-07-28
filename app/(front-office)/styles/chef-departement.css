@@ -1,0 +1,172 @@
+/* Tableau de bord Chef de Département */
+
+.chef-departement-container {
+  max-width: 1200px;
+}
+
+.header-section {
+  margin-bottom: 32px;
+}
+
+.header-section h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0 32px 0;
+}
+
+.stat-box {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border-left: 4px solid;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stat-box.en-cours {
+  border-left-color: var(--encre);
+}
+
+.stat-box.incomplete {
+  border-left-color: var(--statut-refusee-fg);
+}
+
+.stat-box.validee {
+  border-left-color: var(--statut-archivee-fg);
+}
+
+.stat-box-label {
+  font-size: 12px;
+  color: var(--ardoise);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+}
+
+.stat-box-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--encre);
+  margin: 0;
+}
+
+.section-incompletes {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.section-incompletes h2,
+.section-prete h2 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+}
+
+.fiches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fiche-item-incomplete {
+  padding: 14px;
+  background: white;
+  border: 1px solid #e5e3dc;
+  border-left: 4px solid var(--statut-refusee-fg);
+  border-radius: 6px;
+  background: var(--statut-refusee-bg);
+}
+
+.fiche-info {
+  margin-bottom: 12px;
+}
+
+.fiche-title {
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  font-size: 14px;
+}
+
+.fiche-details {
+  font-size: 12px;
+  color: var(--ardoise);
+  margin: 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cloturer {
+  background: var(--statut-refusee-fg);
+  color: white;
+}
+
+.btn-prolonger {
+  background: var(--encre);
+  color: white;
+}
+
+.section-prete {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.fiche-item-prete {
+  padding: 12px;
+  background: white;
+  border: 1px solid #e5e3dc;
+  border-left: 4px solid var(--statut-validee-fg);
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  transition: background 0.2s;
+}
+
+.fiche-item-prete:hover {
+  background: var(--papier);
+}
+
+.empty-message {
+  padding: 16px;
+  background: var(--papier);
+  border-radius: 6px;
+  color: var(--ardoise);
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .fiche-item-incomplete {
+    flex-direction: column;
+  }
+}

@@ -1,75 +1,205 @@
-// Page "serveur" (pas de "use client" ici) : elle peut interroger directement
-// la base de données avec Prisma, sans passer par une route API, parce
-// qu'elle s'exécute sur le serveur avant d'être envoyée au navigateur.
-
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
-import { FicheCard } from "@/components/front-office/FicheCard";
+import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
+import "@/app/(front-office)/styles/chef-de-classe.css";
 
 export default async function TableauDeBordChefDeClasse() {
   const utilisateur = await getUtilisateurActuel();
-  if (!utilisateur) return null; // le middleware nous protège déjà, ceci est une sécurité en plus
+  if (!utilisateur) return null;
 
+  // Récupérer les fiches du chef de classe
   const fiches = await prisma.fiche.findMany({
     where: { chefClasseId: utilisateur.id },
-    include: { affectation: { include: { matiere: true, niveau: true } } },
+    include: {
+      affectation: { include: { matiere: true, niveau: true } },
+      seances: { orderBy: { createdAt: "desc" } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
+  // Récupérer les séances en attente de validation
+  const seancesEnAttente = await prisma.seance.findMany({
+    where: {
+      statut: "EN_ATTENTE",
+      fiche: { chefClasseId: utilisateur.id },
+    },
+    include: { fiche: { include: { affectation: { include: { enseignant: true } } } } },
+    orderBy: { dateSeance: "desc" },
+  });
+
+  // Statistiques
   const heuresRealisees = fiches.reduce((total, f) => total + f.volumeHoraireRealise, 0);
   const heuresPrevues = fiches.reduce((total, f) => total + f.volumeHorairePrevu, 0);
   const fichesActives = fiches.filter((f) => f.statut !== "VALIDEE_ARCHIVEE").length;
+  const fichesIncompletes = fiches.filter((f) => f.statut === "INCOMPLETE").length;
 
   return (
-    <div style={{ maxWidth: 900, margin: "40px auto", padding: "0 16px" }}>
-      <h1>Bonjour, {utilisateur.prenom} {utilisateur.nom}</h1>
-      <p style={{ color: "var(--ardoise)" }}>Chef de classe</p>
+    <div className="chef-de-classe-container">
+      {/* Header */}
+      <div className="header-section">
+        <div>
+          <h1>Bonjour, {utilisateur.prenom} {utilisateur.nom}</h1>
+          <p className="semestre-info">Semestre 2 • Session Normale • 2023-2024</p>
+        </div>
+        <Link href="/chef-de-classe/seances/nouvelle" className="bouton-principal">
+          + Nouvelle Fiche
+        </Link>
+      </div>
 
-      <div style={{ display: "flex", gap: 16, margin: "24px 0" }}>
-        <div className="carte" style={{ flex: 1 }}>
-          <p style={{ color: "var(--ardoise)", fontSize: 13, margin: 0 }}>Heures réalisées</p>
-          <p className="reference-mono" style={{ fontSize: 24, margin: "4px 0", color: "var(--encre)" }}>
-            {heuresRealisees} / {heuresPrevues}h
+      {/* Cartes de statistiques */}
+      <div className="stats-grid">
+        <div className="stat-card attente">
+          <p className="stat-label">Séances en attente</p>
+          <p className="stat-value">{seancesEnAttente.length}</p>
+          <p className="stat-detail">À valider avant vendredi</p>
+        </div>
+        <div className="stat-card validee">
+          <p className="stat-label">Heures validées</p>
+          <p className="stat-value">
+            {heuresRealisees}
+            <span className="stat-unit">/ {heuresPrevues}h</span>
           </p>
+          <p className="stat-detail">{heuresPrevues > 0 ? Math.round((heuresRealisees / heuresPrevues) * 100) : 0}% de la charge annuelle</p>
         </div>
-        <div className="carte" style={{ flex: 1 }}>
-          <p style={{ color: "var(--ardoise)", fontSize: 13, margin: 0 }}>Fiches actives</p>
-          <p style={{ fontSize: 24, margin: "4px 0", color: "var(--encre)" }}>{fichesActives}</p>
+        <div className="stat-card active">
+          <p className="stat-label">Fiches actives</p>
+          <p className="stat-value">{fichesActives}</p>
+          <p className="stat-detail">Cours magistraux en cours</p>
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h2 style={{ margin: 0 }}>Mes fiches</h2>
-      </div>
+      <div className="main-grid">
+        {/* Colonne gauche : séances et fiches */}
+        <div className="main-col">
+          {/* Séances en attente */}
+          {seancesEnAttente.length > 0 && (
+            <section className="section-seances">
+              <div className="section-header">
+                <h2>Séances en attente de validation</h2>
+                {seancesEnAttente.length > 0 && (
+                  <span className="alert-badge">{seancesEnAttente.length}</span>
+                )}
+              </div>
+              <div className="seances-list">
+                {seancesEnAttente.map((seance) => (
+                  <div key={seance.id} className="seance-item attente">
+                    <div className="seance-content">
+                      <p className="seance-matiere">
+                        📋 {seance.fiche.affectation.matiere.nom}
+                      </p>
+                      <p className="seance-time">
+                        {new Date(seance.dateSeance).toLocaleDateString("fr-FR")} •{" "}
+                        {seance.heureDebut} – {seance.heureFin}
+                      </p>
+                    </div>
+                    <div className="seance-actions">
+                      <button className="btn-refuse">✗ REFUSER</button>
+                      <button className="btn-valider">✓ VALIDER</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-      {fiches.length === 0 && (
-        <p style={{ color: "var(--ardoise)" }}>
-          Aucune fiche ne t'est encore assignée. Le chef de département doit d'abord créer une
-          affectation pédagogique.
-        </p>
-      )}
+          {/* Fiches actives */}
+          <section className="section-fiches">
+            <h2>Fiches de suivi actives</h2>
+            {fiches.filter((f) => f.statut !== "VALIDEE_ARCHIVEE").length === 0 ? (
+              <p className="empty-state">
+                Aucune fiche active. Le chef de département va vous en assigner.
+              </p>
+            ) : (
+              <div className="fiches-list">
+                {fiches
+                  .filter((f) => f.statut !== "VALIDEE_ARCHIVEE")
+                  .map((fiche) => (
+                    <div key={fiche.id} className="fiche-item">
+                      <div className="fiche-header">
+                        <h3 className="fiche-title">{fiche.affectation.matiere.nom}</h3>
+                        <Link
+                          href={`/fiches/${fiche.id}`}
+                          className="link-subtle"
+                        >
+                          Ouvrir →
+                        </Link>
+                      </div>
+                      <p className="fiche-meta">
+                        {fiche.affectation.niveau.libelle} • Séance du{" "}
+                        {fiche.seances.length > 0
+                          ? new Date(fiche.seances[0].dateSeance).toLocaleDateString("fr-FR")
+                          : "—"}
+                      </p>
+                      <div className="progression-container">
+                        <ProgressionVolumeHoraire
+                          realise={fiche.volumeHoraireRealise}
+                          prevu={fiche.volumeHorairePrevu}
+                        />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </section>
+        </div>
 
-      {fiches.map((f) => (
-        <div key={f.id}>
-          <FicheCard
-            id={f.id}
-            reference={f.reference}
-            matiere={f.affectation.matiere.nom}
-            niveau={f.affectation.niveau.libelle}
-            statut={f.statut}
-            volumeHoraireRealise={f.volumeHoraireRealise}
-            volumeHorairePrevu={f.volumeHorairePrevu}
-          />
-          {f.statut !== "VALIDEE_ARCHIVEE" && (
-            <div style={{ marginTop: -6, marginBottom: 16 }}>
-              <Link href={`/chef-de-classe/seances/nouvelle?ficheId=${f.id}`} className="bouton-secondaire">
-                + Enregistrer une séance
-              </Link>
+        {/* Colonne droite : activité récente */}
+        <aside className="sidebar-right">
+          <h3>Activité récente</h3>
+          <div className="activity-feed">
+            <div className="activity-item">
+              <span className="activity-icon">✓</span>
+              <div>
+                <p className="activity-title">Fiche Validée par l'Administration</p>
+                <p className="activity-meta">Micro-économie • 8 h 2 heures</p>
+              </div>
+            </div>
+            <div className="activity-item">
+              <span className="activity-icon">📝</span>
+              <div>
+                <p className="activity-title">Nouvelle séance enregistrée</p>
+                <p className="activity-meta">GES-402 • Hier, 18:45</p>
+              </div>
+            </div>
+            <div className="activity-item">
+              <span className="activity-icon">⚠️</span>
+              <div>
+                <p className="activity-title">Modification requise</p>
+                <p className="activity-meta">INF-201 • 23 Octobre</p>
+              </div>
+            </div>
+          </div>
+
+          {fichesIncompletes > 0 && (
+            <div className="warning-box">
+              <p>
+                <strong>{fichesIncompletes} fiche(s) incomplète(s)</strong>
+              </p>
+              <p>
+                Le volume horaire n'a pas atteint l'objectif. Consultez le chef de département
+                pour la clôturation.
+              </p>
             </div>
           )}
-        </div>
-      ))}
+
+          <div className="class-summary">
+            <h4>Résumé de la classe</h4>
+            <div className="summary-item">
+              <span>Effectif Total</span>
+              <strong>42 Étudiants</strong>
+            </div>
+            <div className="summary-item">
+              <span>Délégué adjoint</span>
+              <strong>Sarah M.</strong>
+            </div>
+            <div className="summary-item">
+              <span>Prochaine séance</span>
+              <strong>Vendredi, 14:00</strong>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

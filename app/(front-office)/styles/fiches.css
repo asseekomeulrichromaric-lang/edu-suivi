@@ -1,0 +1,198 @@
+/* Fiche détail - affichage et gestion */
+
+.fiche-detail-container {
+  max-width: 900px;
+}
+
+.fiche-header-detail {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid var(--encre);
+}
+
+.fiche-ref {
+  font-size: 12px;
+  color: var(--ardoise);
+  margin: 0 0 8px 0;
+  font-family: var(--font-mono);
+}
+
+.fiche-title-detail {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: var(--encre);
+}
+
+.fiche-subtitle {
+  font-size: 14px;
+  color: var(--ardoise);
+  margin: 0;
+}
+
+.fiche-statut-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.volume-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.volume-section h2 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.progress-section {
+  margin-bottom: 16px;
+}
+
+.progress-label {
+  font-size: 13px;
+  color: var(--ardoise);
+  margin: 0 0 8px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-bar-large {
+  height: 12px;
+  background: #e5e3dc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progress-fill-large {
+  height: 100%;
+  background: var(--statut-validee-fg);
+  transition: width 0.3s;
+}
+
+.completion-text {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  color: var(--encre);
+}
+
+.seances-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.seances-section h2 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.seance-entry {
+  padding: 12px;
+  background: white;
+  border: 1px solid #e5e3dc;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.seance-entry.validee {
+  border-left: 4px solid var(--statut-validee-fg);
+  background: var(--statut-validee-bg);
+}
+
+.seance-entry.refusee {
+  border-left: 4px solid var(--statut-refusee-fg);
+  background: var(--statut-refusee-bg);
+}
+
+.seance-entry.en-attente {
+  border-left: 4px solid var(--statut-attente-fg);
+  background: var(--statut-attente-bg);
+}
+
+.seance-info-detail {
+  flex: 1;
+}
+
+.seance-date {
+  font-size: 12px;
+  color: var(--ardoise);
+  margin: 0 0 2px 0;
+  font-family: var(--font-mono);
+}
+
+.seance-content-text {
+  font-size: 13px;
+  color: var(--encre);
+  margin: 0;
+}
+
+.seance-badge {
+  padding: 4px 8px;
+  background: var(--statut-validee-fg);
+  color: white;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.signature-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.signature-section h2 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.signature-icon {
+  font-size: 48px;
+  margin: 0 0 16px 0;
+}
+
+.signature-description {
+  font-size: 13px;
+  color: var(--ardoise);
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+.btn-download {
+  background: var(--encre);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .seance-entry {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fiche-header-detail {
+    padding: 16px;
+  }
+}

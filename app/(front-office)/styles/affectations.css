@@ -1,0 +1,119 @@
+/* Affectations - List et création */
+
+.affectations-container {
+  max-width: 900px;
+}
+
+.affectations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.affectations-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.affectations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.affectation-card {
+  background: white;
+  border: 1px solid #e5e3dc;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.affectation-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.affectation-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+}
+
+.affectation-meta {
+  font-size: 12px;
+  color: var(--ardoise);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.form-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-section h2 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-grid.full {
+  grid-template-columns: 1fr;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-submit {
+  background: var(--encre);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cancel {
+  background: transparent;
+  color: var(--encre);
+  padding: 10px 20px;
+  border: 1px solid var(--ardoise);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.info-box {
+  background: var(--statut-validee-bg);
+  border-left: 4px solid var(--statut-validee-fg);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin: 16px 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .affectations-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

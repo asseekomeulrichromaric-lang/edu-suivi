@@ -1,0 +1,250 @@
+/* Profil utilisateur - édition et affichage */
+
+.profil-container {
+  max-width: 800px;
+}
+
+.profil-header {
+  margin-bottom: 32px;
+}
+
+.profil-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.profil-header p {
+  margin: 4px 0 0 0;
+  color: var(--ardoise);
+  font-size: 14px;
+}
+
+.profil-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.profil-avatar-section {
+  text-align: center;
+}
+
+.profil-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--papier);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  margin: 0 auto 12px;
+  border: 2px solid var(--encre);
+}
+
+.avatar-change-btn {
+  font-size: 12px;
+  color: var(--encre);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.profil-info-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.info-group {
+  margin-bottom: 16px;
+}
+
+.info-group:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--ardoise);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 4px 0;
+}
+
+.info-value {
+  font-size: 14px;
+  color: var(--encre);
+  margin: 0;
+  font-weight: 500;
+}
+
+.profil-form {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.profil-form h2 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.form-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 13px;
+  color: var(--ardoise);
+  font-weight: 500;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  padding: 10px;
+  border: 1px solid var(--ardoise);
+  border-radius: 6px;
+  font-family: var(--font-corps);
+  font-size: 14px;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: 2px solid var(--encre);
+  outline-offset: 1px;
+}
+
+.form-field-full {
+  grid-column: 1 / -1;
+}
+
+.rules-box {
+  background: var(--statut-attente-bg);
+  border-left: 4px solid var(--statut-attente-fg);
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.rules-box h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+}
+
+.rules-box ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.rules-box li {
+  margin-bottom: 4px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-save {
+  background: var(--encre);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cancel-profil {
+  background: transparent;
+  color: var(--encre);
+  padding: 10px 20px;
+  border: 1px solid var(--ardoise);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.security-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.security-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+}
+
+.security-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e3dc;
+}
+
+.security-item:last-child {
+  border-bottom: none;
+}
+
+.security-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.security-label p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--encre);
+  font-weight: 500;
+}
+
+.security-label span {
+  font-size: 11px;
+  color: var(--ardoise);
+}
+
+.btn-modify {
+  background: transparent;
+  color: var(--encre);
+  padding: 6px 12px;
+  border: 1px solid var(--ardoise);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .profil-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}
