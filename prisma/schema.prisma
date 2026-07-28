@@ -1,0 +1,179 @@
+// Schéma de la base de données EduSuivi — PostgreSQL
+// C'est la traduction directe du MLD (modèle logique de données) qu'on a conçu.
+// Chaque "model" ci-dessous devient une table dans la base de données.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // lu depuis le fichier .env, jamais écrit en dur ici
+}
+
+// ---------- Enums (listes de valeurs autorisées) ----------
+
+enum Role {
+  ADMINISTRATEUR
+  CHEF_DEPARTEMENT
+  ENSEIGNANT
+  CHEF_CLASSE
+}
+
+enum StatutFiche {
+  EN_COURS
+  INCOMPLETE
+  PRETE_A_SIGNER
+  VALIDEE_ARCHIVEE
+}
+
+enum StatutSeance {
+  EN_ATTENTE
+  VALIDEE
+  REFUSEE
+}
+
+enum TypeEvenement {
+  CREATION
+  VALIDATION_SEANCE
+  REFUS_SEANCE
+  TELECHARGEMENT_PDF
+  CONFIRMATION_ARCHIVAGE
+  CLOTURE_INCOMPLETE
+  PROLONGATION
+}
+
+// ---------- Tables ----------
+
+model Utilisateur {
+  id             String   @id @default(uuid())
+  nom            String
+  prenom         String
+  email          String   @unique
+  motDePasseHash String
+  role           Role
+  createdAt      DateTime @default(now())
+
+  departementId String?
+  departement   Departement? @relation(fields: [departementId], references: [id])
+
+  // Relations inverses (un utilisateur peut être lié à plusieurs affectations, fiches, etc.)
+  affectationsEnseignant AffectationPedagogique[] @relation("Enseignant")
+  fichesChefClasse       Fiche[]                  @relation("ChefClasse")
+  evenements             HistoriqueEvenement[]
+}
+
+model Departement {
+  id   String @id @default(uuid())
+  nom  String @unique
+
+  filieres     Filiere[]
+  matieres     Matiere[]
+  utilisateurs Utilisateur[]
+}
+
+model Filiere {
+  id            String      @id @default(uuid())
+  nom           String
+  departementId String
+  departement   Departement @relation(fields: [departementId], references: [id])
+
+  niveaux Niveau[]
+}
+
+model Niveau {
+  id        String  @id @default(uuid())
+  libelle   String
+  filiereId String
+  filiere   Filiere @relation(fields: [filiereId], references: [id])
+
+  affectations AffectationPedagogique[]
+}
+
+model Matiere {
+  id                      String      @id @default(uuid())
+  nom                     String
+  volumeHoraireReference  Int
+  departementId           String
+  departement             Departement @relation(fields: [departementId], references: [id])
+
+  affectations AffectationPedagogique[]
+}
+
+model AffectationPedagogique {
+  id               String   @id @default(uuid())
+  anneeAcademique  String // ex: "2025-2026"
+
+  enseignantId String
+  enseignant   Utilisateur @relation("Enseignant", fields: [enseignantId], references: [id])
+
+  matiereId String
+  matiere   Matiere @relation(fields: [matiereId], references: [id])
+
+  niveauId String
+  niveau   Niveau  @relation(fields: [niveauId], references: [id])
+
+  fiche Fiche?
+
+  // Une même combinaison enseignant/matière/niveau/année ne peut exister qu'une fois
+  @@unique([enseignantId, matiereId, niveauId, anneeAcademique])
+}
+
+model Fiche {
+  id        String      @id @default(uuid())
+  reference String      @unique // ex: EDU-2026-DINF-0142
+  statut    StatutFiche @default(EN_COURS)
+
+  volumeHorairePrevu   Int
+  volumeHoraireRealise Int @default(0)
+
+  dateLimiteSemestre DateTime
+
+  affectationId String                  @unique
+  affectation   AffectationPedagogique  @relation(fields: [affectationId], references: [id])
+
+  chefClasseId String
+  chefClasse   Utilisateur @relation("ChefClasse", fields: [chefClasseId], references: [id])
+
+  dateTelechargementPdf   DateTime?
+  dateConfirmationArchivage DateTime?
+
+  createdAt DateTime @default(now())
+
+  seances    Seance[]
+  evenements HistoriqueEvenement[]
+}
+
+model Seance {
+  id         String       @id @default(uuid())
+  ficheId    String
+  fiche      Fiche        @relation(fields: [ficheId], references: [id])
+
+  date       DateTime
+  heureDebut String // stocké en "HH:MM" pour rester simple
+  heureFin   String
+  contenu    String
+
+  statut     StatutSeance @default(EN_ATTENTE)
+  motifRefus String?
+
+  createdAt DateTime @default(now())
+
+  evenements HistoriqueEvenement[]
+}
+
+model HistoriqueEvenement {
+  id            String        @id @default(uuid())
+  typeEvenement TypeEvenement
+  horodatage    DateTime      @default(now())
+  details       String?
+
+  ficheId String
+  fiche   Fiche  @relation(fields: [ficheId], references: [id])
+
+  seanceId String?
+  seance   Seance? @relation(fields: [seanceId], references: [id])
+
+  auteurId String
+  auteur   Utilisateur @relation(fields: [auteurId], references: [id])
+}

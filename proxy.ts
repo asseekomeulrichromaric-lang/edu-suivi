@@ -1,6 +1,8 @@
 // Ce fichier s'exécute AVANT chaque page, automatiquement (Next.js le détecte
-// grâce à son nom "middleware.ts" à la racine de src/). C'est le "videur à
+// grâce à son nom "proxy.ts" à la racine de src/). C'est le "videur à
 // l'entrée" : il vérifie les droits avant même que la page ne s'affiche.
+// (Ce fichier s'appelait "middleware.ts" avant Next.js 16 — la convention a
+// été renommée en "proxy.ts", mais le fonctionnement est identique.)
 //
 // NOTE TECHNIQUE : le middleware tourne dans un environnement allégé ("Edge
 // Runtime") qui n'a pas accès à next/headers de la même façon que les pages.
@@ -8,10 +10,10 @@
 // la fonction "verifierJeton" (compatible Edge Runtime) plutôt que "getSession".
 
 import { NextRequest, NextResponse } from "next/server";
-import { NOM_COOKIE, verifierJeton } from "@/lib/auth";
-import { peutAccederBackOffice } from "@/lib/permissions";
+import { NOM_COOKIE, verifierJeton } from "./lib/auth";
+import { peutAccederBackOffice } from "./lib/permissions";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Les pages publiques (connexion) ne demandent aucune vérification
