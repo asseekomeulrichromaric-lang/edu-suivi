@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
+import { getSession } from "@/lib/auth";
 import { ActionsFicheIncomplete } from "@/components/front-office/ActionsFicheIncomplete";
+import { BoutonTelechargerEtConfirmer } from "@/components/front-office/BoutonTelechargerEtConfirmer";
 import { StatutBadge } from "@/components/ui/StatutBadge";
 
 export default async function TableauDeBordChefDeDepartement() {
   const utilisateur = await getUtilisateurActuel();
+  const session = await getSession();
   if (!utilisateur || !utilisateur.departementId) return null;
 
   const toutesLesFiches = await prisma.fiche.findMany({
@@ -64,19 +67,32 @@ export default async function TableauDeBordChefDeDepartement() {
       <h2 style={{ marginTop: 32 }}>Fiches prêtes pour signature ({fichesPretes.length})</h2>
       {fichesPretes.length === 0 && <p style={{ color: "var(--ardoise)" }}>Aucune fiche en attente de réception.</p>}
       {fichesPretes.map((f) => (
-        <Link
+        <div
           key={f.id}
-          href={`/fiches/${f.id}`}
           className="carte"
-          style={{ display: "block", marginBottom: 12, borderLeft: "4px solid var(--statut-validee-fg)", textDecoration: "none", color: "inherit" }}
+          style={{ marginBottom: 12, borderLeft: "4px solid var(--statut-validee-fg)" }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <p style={{ fontWeight: 600, margin: 0 }}>
-              {f.affectation.matiere.nom} — {f.affectation.niveau.libelle}
-            </p>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <h3 style={{ margin: "0 0 4px" }}>
+                {f.affectation.matiere.nom} — {f.affectation.niveau.libelle}
+              </h3>
+              <p style={{ fontSize: 13, color: "var(--ardoise)", margin: 0 }}>
+                {f.affectation.enseignant.prenom} {f.affectation.enseignant.nom}
+              </p>
+              <Link href={`/fiches/${f.id}`} style={{ fontSize: 12, color: "var(--encre)" }}>
+                Voir la fiche complète →
+              </Link>
+            </div>
             <StatutBadge statut={f.statut} />
           </div>
-        </Link>
+          <div style={{ marginTop: 16 }}>
+            <BoutonTelechargerEtConfirmer
+              ficheId={f.id}
+              peutConfirmerArchivage={session?.role === "CHEF_DEPARTEMENT"}
+            />
+          </div>
+        </div>
       ))}
     </div>
   );

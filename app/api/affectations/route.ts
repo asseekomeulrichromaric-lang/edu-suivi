@@ -13,43 +13,60 @@ export async function POST(request: Request) {
     return Response.json({ erreur: "Action réservée au chef de département." }, { status: 403 });
   }
 
-  const { matiereId, niveauId, enseignantId, chefClasseId, volumeHorairePrevu, anneeAcademique, dateLimiteSemestre } =
-    await request.json();
+  try {
+    const { matiereId, niveauId, enseignantId, chefClasseId, volumeHorairePrevu, anneeAcademique, dateLimiteSemestre } =
+      await request.json();
 
-  if (!matiereId || !niveauId || !enseignantId || !chefClasseId || !volumeHorairePrevu || !dateLimiteSemestre) {
-    return Response.json({ erreur: "Tous les champs sont obligatoires." }, { status: 400 });
-  }
+    if (!matiereId || !niveauId || !enseignantId || !chefClasseId || !volumeHorairePrevu || !dateLimiteSemestre) {
+      return Response.json({ erreur: "Tous les champs sont obligatoires." }, { status: 400 });
+    }
 
-  // On génère une référence lisible, ex: EDU-2026-DINF-0007
-  const compteFiches = await prisma.fiche.count();
-  const reference = `EDU-${new Date().getFullYear()}-DINF-${String(compteFiches + 1).padStart(4, "0")}`;
+    // On génère une référence lisible, ex: EDU-2026-DINF-0007
+    const compteFiches = await prisma.fiche.count();
+    const reference = `EDU-${new Date().getFullYear()}-DINF-${String(compteFiches + 1).padStart(4, "0")}`;
 
-  const affectation = await prisma.affectationPedagogique.create({
-    data: {
-      matiereId,
-      niveauId,
-      enseignantId,
-      anneeAcademique: anneeAcademique || "2025-2026",
-      fiche: {
-        create: {
-          reference,
-          chefClasseId,
-          volumeHorairePrevu: Number(volumeHorairePrevu),
-          dateLimiteSemestre: new Date(dateLimiteSemestre),
+    const affectation = await prisma.affectationPedagogique.create({
+      data: {
+        matiereId,
+        niveauId,
+        enseignantId,
+        anneeAcademique: anneeAcademique || "2025-2026",
+        fiche: {
+          create: {
+            reference,
+            chefClasseId,
+            volumeHorairePrevu: Number(volumeHorairePrevu),
+            dateLimiteSemestre: new Date(dateLimiteSemestre),
+          },
         },
       },
-    },
-    include: { fiche: true },
-  });
+      include: { fiche: true },
+    });
 
-  await prisma.historiqueEvenement.create({
-    data: {
-      ficheId: affectation.fiche!.id,
-      auteurId: session.utilisateurId,
-      typeEvenement: "CREATION",
-      details: "Affectation pédagogique et fiche créées.",
-    },
-  });
+    await prisma.historiqueEvenement.create({
+      data: {
+        ficheId: affectation.fiche!.id,
+        auteurId: session.utilisateurId,
+        typeEvenement: "CREATION",
+        details: "Affectation pédagogique et fiche créées.",
+      },
+    });
 
-  return Response.json(affectation, { status: 201 });
+    return Response.json(affectation, { status: 201 });
+  } catch (erreur: any) {
+    // Gérer les erreurs Prisma
+    if (erreur.code === "P2002") {
+      const contrainte = erreur.meta?.target?.[0] || "champs";
+      return Response.json(
+        { erreur: `Une affectation existe déjà pour cette combinaison de ${contrainte}. Vérifiez les sélections.` },
+        { status: 409 }
+      );
+    }
+    
+    console.error("Erreur API affectations:", erreur);
+    return Response.json(
+      { erreur: "Erreur lors de la création de l'affectation. Veuillez réessayer." },
+      { status: 500 }
+    );
+  }
 }
