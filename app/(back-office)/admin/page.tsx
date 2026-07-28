@@ -163,19 +163,3 @@ export default async function AdminDashboard() {
     </div>
   );
 }
-        <div className="carte" style={{ flex: 1 }}>
-          <p style={{ color: "var(--ardoise)", fontSize: 13, margin: 0 }}>Départements</p>
-          <p style={{ fontSize: 24, margin: "4px 0" }}>{totalDepartements}</p>
-        </div>
-        <div className="carte" style={{ flex: 1 }}>
-          <p style={{ color: "var(--ardoise)", fontSize: 13, margin: 0 }}>Filières</p>
-          <p style={{ fontSize: 24, margin: "4px 0" }}>{totalFilieres}</p>
-        </div>
-        <div className="carte" style={{ flex: 1 }}>
-          <p style={{ color: "var(--ardoise)", fontSize: 13, margin: 0 }}>Fiches</p>
-          <p style={{ fontSize: 24, margin: "4px 0" }}>{totalFiches}</p>
-        </div>
-      </div>
-    </div>
-  );
-}

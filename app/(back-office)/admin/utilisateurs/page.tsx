@@ -67,31 +67,3 @@ export default async function GestionUtilisateurs() {
     </div>
   );
 }
-        <Link href="/admin/utilisateurs/nouveau" className="bouton-principal">
-          + Nouvel utilisateur
-        </Link>
-      </div>
-
-      <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 20 }}>
-        <thead>
-          <tr style={{ background: "var(--encre)", color: "white", textAlign: "left" }}>
-            <th style={{ padding: 10 }}>Nom</th>
-            <th style={{ padding: 10 }}>E-mail</th>
-            <th style={{ padding: 10 }}>Rôle</th>
-            <th style={{ padding: 10 }}>Département</th>
-          </tr>
-        </thead>
-        <tbody>
-          {utilisateurs.map((u) => (
-            <tr key={u.id} style={{ borderBottom: "1px solid #e5e3dc" }}>
-              <td style={{ padding: 10 }}>{u.prenom} {u.nom}</td>
-              <td style={{ padding: 10 }} className="reference-mono">{u.email}</td>
-              <td style={{ padding: 10 }}>{LIBELLES_ROLE[u.role]}</td>
-              <td style={{ padding: 10 }}>{u.departement?.nom ?? "—"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}

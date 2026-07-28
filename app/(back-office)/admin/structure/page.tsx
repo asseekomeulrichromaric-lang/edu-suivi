@@ -42,22 +42,3 @@ export default async function StructureAcademique() {
     </div>
   );
 }
-
-          <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>Filières et niveaux</p>
-          {dep.filieres.map((f) => (
-            <p key={f.id} style={{ fontSize: 14, margin: "4px 0" }}>
-              {f.nom} — {f.niveaux.map((n) => n.libelle).join(", ") || "aucun niveau"}
-            </p>
-          ))}
-
-          <p style={{ fontWeight: 600, fontSize: 14, marginTop: 14, marginBottom: 6 }}>Matières</p>
-          {dep.matieres.map((m) => (
-            <p key={m.id} style={{ fontSize: 14, margin: "4px 0" }}>
-              {m.nom} <span className="reference-mono" style={{ color: "var(--ardoise)" }}>({m.volumeHoraireReference}h de référence)</span>
-            </p>
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}

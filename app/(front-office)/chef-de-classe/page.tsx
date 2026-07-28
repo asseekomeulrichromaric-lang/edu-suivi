@@ -24,7 +24,7 @@ export default async function TableauDeBordChefDeClasse() {
       statut: "EN_ATTENTE",
       fiche: { chefClasseId: utilisateur.id },
     },
-    include: { fiche: { include: { affectation: { include: { enseignant: true } } } } },
+    include: { fiche: { include: { affectation: { include: { enseignant: true, matiere: true } } } } },
     orderBy: { date: "desc" },
   });
 

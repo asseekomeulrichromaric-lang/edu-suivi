@@ -11,7 +11,8 @@ export default async function TableauDeBordEnseignant() {
   const fiches = await prisma.fiche.findMany({
     where: { affectation: { enseignantId: utilisateur.id } },
     include: {
-      affectation: { include: { matiere: true, niveau: true, chefClasse: true } },
+      affectation: { include: { matiere: true, niveau: true } },
+      chefClasse: true,
       seances: { orderBy: { date: "desc" } },
     },
     orderBy: { createdAt: "desc" },
@@ -23,7 +24,7 @@ export default async function TableauDeBordEnseignant() {
       statut: "EN_ATTENTE",
       fiche: { affectation: { enseignantId: utilisateur.id } },
     },
-    include: { fiche: { include: { affectation: { include: { matiere: true } } } } },
+    include: { fiche: { include: { affectation: { include: { matiere: true, niveau: true } } } } },
     orderBy: { date: "desc" },
   });
 
@@ -108,7 +109,7 @@ export default async function TableauDeBordEnseignant() {
                       </div>
                       <p className="fiche-meta">
                         {fiche.affectation.niveau.libelle} • Chef de classe :{" "}
-                        {fiche.affectation.chefClasse.prenom} {fiche.affectation.chefClasse.nom}
+                        {fiche.chefClasse.prenom} {fiche.chefClasse.nom}
                       </p>
                       <div className="progress-bar">
                         <div

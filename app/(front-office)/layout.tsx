@@ -9,9 +9,9 @@ export default async function FrontOfficeLayout({ children }: { children: React.
 
   // Déterminer le lien actif en fonction du rôle
   const rolePaths: Record<string, string> = {
-    CHEF_DE_CLASSE: "/chef-de-classe",
+    CHEF_CLASSE: "/chef-de-classe",
     ENSEIGNANT: "/enseignant",
-    CHEF_DE_DEPARTEMENT: "/chef-de-departement",
+    CHEF_DEPARTEMENT: "/chef-de-departement",
     ADMINISTRATEUR: "/admin",
   };
 
@@ -41,7 +41,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
             </Link>
           </li>
 
-          {utilisateur.role === "CHEF_DE_CLASSE" && (
+          {utilisateur.role === "CHEF_CLASSE" && (
             <>
               <li>
                 <Link href="/chef-de-classe">
@@ -61,7 +61,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
             </>
           )}
 
-          {utilisateur.role === "CHEF_DE_DEPARTEMENT" && (
+          {utilisateur.role === "CHEF_DEPARTEMENT" && (
             <>
               <li>
                 <Link href="/chef-de-departement">
