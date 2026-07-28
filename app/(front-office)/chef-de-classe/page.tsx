@@ -25,7 +25,7 @@ export default async function TableauDeBordChefDeClasse() {
       fiche: { chefClasseId: utilisateur.id },
     },
     include: { fiche: { include: { affectation: { include: { enseignant: true } } } } },
-    orderBy: { dateSeance: "desc" },
+    orderBy: { date: "desc" },
   });
 
   // Statistiques
@@ -89,7 +89,7 @@ export default async function TableauDeBordChefDeClasse() {
                         📋 {seance.fiche.affectation.matiere.nom}
                       </p>
                       <p className="seance-time">
-                        {new Date(seance.dateSeance).toLocaleDateString("fr-FR")} •{" "}
+                        {new Date(seance.date).toLocaleDateString("fr-FR")} •{" "}
                         {seance.heureDebut} – {seance.heureFin}
                       </p>
                     </div>
@@ -128,7 +128,7 @@ export default async function TableauDeBordChefDeClasse() {
                       <p className="fiche-meta">
                         {fiche.affectation.niveau.libelle} • Séance du{" "}
                         {fiche.seances.length > 0
-                          ? new Date(fiche.seances[0].dateSeance).toLocaleDateString("fr-FR")
+                          ? new Date(fiche.seances[0].date).toLocaleDateString("fr-FR")
                           : "—"}
                       </p>
                       <div className="progression-container">

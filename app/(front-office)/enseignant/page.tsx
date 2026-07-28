@@ -12,7 +12,7 @@ export default async function TableauDeBordEnseignant() {
     where: { affectation: { enseignantId: utilisateur.id } },
     include: {
       affectation: { include: { matiere: true, niveau: true, chefClasse: true } },
-      seances: { orderBy: { dateSeance: "desc" } },
+      seances: { orderBy: { date: "desc" } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -24,7 +24,7 @@ export default async function TableauDeBordEnseignant() {
       fiche: { affectation: { enseignantId: utilisateur.id } },
     },
     include: { fiche: { include: { affectation: { include: { matiere: true } } } } },
-    orderBy: { dateSeance: "desc" },
+    orderBy: { date: "desc" },
   });
 
   const heuresValidees = fiches.reduce((total, f) => total + f.volumeHoraireRealise, 0);
@@ -76,7 +76,7 @@ export default async function TableauDeBordEnseignant() {
                         📋 {seance.fiche.affectation.matiere.nom}
                       </p>
                       <p className="seance-time">
-                        {new Date(seance.dateSeance).toLocaleDateString("fr-FR")} • {seance.heureDebut} – {seance.heureFin}
+                        {new Date(seance.date).toLocaleDateString("fr-FR")} • {seance.heureDebut} – {seance.heureFin}
                       </p>
                       <p className="seance-contenu">{seance.contenu}</p>
                     </div>
