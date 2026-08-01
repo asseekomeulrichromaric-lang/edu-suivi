@@ -3,6 +3,7 @@ import { FiCheckSquare, FiXCircle, FiCheckCircle, FiEdit3, FiAlertTriangle } fro
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
+import { FormulaireCreationFiche } from "@/components/front-office/FormulaireCreationFiche";
 import "@/app/(front-office)/styles/chef-de-classe.css";
 
 export default async function TableauDeBordChefDeClasse() {
@@ -13,10 +14,22 @@ export default async function TableauDeBordChefDeClasse() {
   const fiches = await prisma.fiche.findMany({
     where: { chefClasseId: utilisateur.id },
     include: {
-      affectation: { include: { matiere: true, niveau: true } },
+      affectation: { include: { matiere: true, niveau: true, enseignant: true } },
       seances: { orderBy: { createdAt: "desc" } },
     },
     orderBy: { createdAt: "desc" },
+  });
+
+  const affectationsDisponibles = await prisma.affectationPedagogique.findMany({
+    where: {
+      fiche: null,
+      enseignant: { departementId: utilisateur.departementId },
+    },
+    include: {
+      matiere: true,
+      niveau: true,
+      enseignant: true,
+    },
   });
 
   // Récupérer les séances en attente de validation
@@ -73,6 +86,12 @@ export default async function TableauDeBordChefDeClasse() {
       <div className="main-grid">
         {/* Colonne gauche : séances et fiches */}
         <div className="main-col">
+          <section className="section-seances" style={{ marginBottom: 20 }}>
+            <div className="section-header">
+              <h2>Créer une fiche</h2>
+            </div>
+            <FormulaireCreationFiche affectations={affectationsDisponibles} />
+          </section>
           {/* Séances en attente */}
           {seancesEnAttente.length > 0 && (
             <section className="section-seances">
@@ -124,6 +143,13 @@ export default async function TableauDeBordChefDeClasse() {
                           className="link-subtle"
                         >
                           Ouvrir →
+                        </Link>
+                        <Link
+                          href={`/chef-de-classe/seances/nouvelle?ficheId=${fiche.id}`}
+                          className="link-subtle"
+                          style={{ marginLeft: 8 }}
+                        >
+                          Enregistrer une séance
                         </Link>
                       </div>
                       <p className="fiche-meta">

@@ -20,8 +20,23 @@ async function main() {
     data: { libelle: "Licence 3", filiereId: filiere.id },
   });
 
-  const matiere = await prisma.matiere.create({
-    data: { nom: "Base de données avancées", volumeHoraireReference: 30, departementId: departement.id },
+  const matieres = await prisma.matiere.createMany({
+    data: [
+      { nom: "Base de données avancées", volumeHoraireReference: 30, departementId: departement.id },
+      { nom: "Analyse de données", volumeHoraireReference: 24, departementId: departement.id },
+      { nom: "Algorithmique", volumeHoraireReference: 28, departementId: departement.id },
+      { nom: "Statistiques inférentielles", volumeHoraireReference: 26, departementId: departement.id },
+      { nom: "Programmation web", volumeHoraireReference: 24, departementId: departement.id },
+      { nom: "Systèmes d'information", volumeHoraireReference: 20, departementId: departement.id },
+      { nom: "Réseaux et sécurité", volumeHoraireReference: 22, departementId: departement.id },
+      { nom: "Gestion de projet", volumeHoraireReference: 18, departementId: departement.id },
+      { nom: "Mathématiques appliquées", volumeHoraireReference: 20, departementId: departement.id },
+      { nom: "Marketing digital", volumeHoraireReference: 16, departementId: departement.id },
+    ],
+  });
+
+  const matiere = await prisma.matiere.findFirst({
+    where: { nom: "Base de données avancées", departementId: departement.id },
   });
 
   const motDePasseHash = await bcrypt.hash("motdepasse123", 10);
@@ -74,7 +89,7 @@ async function main() {
     data: {
       anneeAcademique: "2025-2026",
       enseignantId: enseignant.id,
-      matiereId: matiere.id,
+      matiereId: matiere!.id,
       niveauId: niveau.id,
     },
   });

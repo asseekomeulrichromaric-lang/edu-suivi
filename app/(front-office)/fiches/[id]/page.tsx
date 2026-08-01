@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { FiDownload } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { estChefDeDepartement } from "@/lib/permissions";
@@ -65,6 +66,26 @@ export default async function DetailFichePage({ params }: { params: Promise<{ id
             ficheId={fiche.id}
             peutConfirmerArchivage={estChefDeDepartement(session.role)}
           />
+        </div>
+      )}
+
+      {(fiche.volumeHoraireRealise >= fiche.volumeHorairePrevu && 
+        session && (estChefDeDepartement(session.role) || fiche.chefClasseId === session.utilisateurId)) && (
+        <div className="carte" style={{ marginBottom: 20, background: "#EAF3DE", borderLeft: "4px solid #2F7D5A" }}>
+          <p style={{ margin: "0 0 12px", fontWeight: 600, color: "#1D3557" }}>
+            Télécharger la fiche
+          </p>
+          <p style={{ margin: "0 0 12px", color: "#6B7280", fontSize: 14 }}>
+            Le volume horaire est complété. Vous pouvez télécharger la fiche au format PDF pour la signer.
+          </p>
+          <a
+            href={`/api/fiches/${fiche.id}/pdf`}
+            download={`${fiche.reference}.pdf`}
+            className="bouton-principal"
+            style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
+          >
+            <FiDownload /> Télécharger en PDF
+          </a>
         </div>
       )}
 

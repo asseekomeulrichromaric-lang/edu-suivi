@@ -70,7 +70,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
                 </Link>
               </li>
               <li>
-                <Link href="/affectations">
+                <Link href="/chef-de-departement/affectations">
                   <FiLayers /> Affectations
                 </Link>
               </li>
