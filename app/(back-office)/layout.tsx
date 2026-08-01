@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FiSettings, FiBarChart2, FiUsers, FiUser } from "react-icons/fi";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import "@/app/(back-office)/styles/layout.css";
 
@@ -14,7 +15,7 @@ export default async function BackOfficeLayout({ children }: { children: React.R
       {/* Barre latérale */}
       <nav className="sidebar-back">
         <div className="logo-section">
-          <div className="logo-icon-back">⚙️</div>
+          <div className="logo-icon-back"><FiSettings /></div>
           <div>
             <h3>EduSuivi</h3>
             <p>Administration</p>
@@ -24,24 +25,24 @@ export default async function BackOfficeLayout({ children }: { children: React.R
         <ul className="menu-back">
           <li>
             <Link href="/admin">
-              📊 Accueil
+              <FiBarChart2 /> Accueil
             </Link>
           </li>
           <li>
             <Link href="/admin/structure">
-              🏢 Structure Académique
+              <FiSettings /> Structure Académique
             </Link>
           </li>
           <li>
             <Link href="/admin/utilisateurs">
-              👥 Gestion du Personnel
+              <FiUsers /> Gestion du Personnel
             </Link>
           </li>
         </ul>
 
         <div className="user-section">
           <Link href="/profil">
-            👤 {utilisateur.prenom} {utilisateur.nom}
+            <FiUser /> {utilisateur.prenom} {utilisateur.nom}
           </Link>
         </div>
       </nav>

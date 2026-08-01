@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FiCheckSquare, FiXCircle, FiCheckCircle, FiEdit3, FiAlertTriangle } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
@@ -86,7 +87,7 @@ export default async function TableauDeBordChefDeClasse() {
                   <div key={seance.id} className="seance-item attente">
                     <div className="seance-content">
                       <p className="seance-matiere">
-                        📋 {seance.fiche.affectation.matiere.nom}
+                        <FiCheckSquare /> {seance.fiche.affectation.matiere.nom}
                       </p>
                       <p className="seance-time">
                         {new Date(seance.date).toLocaleDateString("fr-FR")} •{" "}
@@ -94,8 +95,8 @@ export default async function TableauDeBordChefDeClasse() {
                       </p>
                     </div>
                     <div className="seance-actions">
-                      <button className="btn-refuse">✗ REFUSER</button>
-                      <button className="btn-valider">✓ VALIDER</button>
+                      <button className="btn-refuse"><FiXCircle /> REFUSER</button>
+                      <button className="btn-valider"><FiCheckSquare /> VALIDER</button>
                     </div>
                   </div>
                 ))}
@@ -149,21 +150,21 @@ export default async function TableauDeBordChefDeClasse() {
           <h3>Activité récente</h3>
           <div className="activity-feed">
             <div className="activity-item">
-              <span className="activity-icon">✓</span>
+              <span className="activity-icon"><FiCheckCircle /></span>
               <div>
-                <p className="activity-title">Fiche Validée par l'Administration</p>
+                <p className="activity-title">Fiche validée par l&apos;Administration</p>
                 <p className="activity-meta">Micro-économie • 8 h 2 heures</p>
               </div>
             </div>
             <div className="activity-item">
-              <span className="activity-icon">📝</span>
+              <span className="activity-icon"><FiEdit3 /></span>
               <div>
                 <p className="activity-title">Nouvelle séance enregistrée</p>
                 <p className="activity-meta">GES-402 • Hier, 18:45</p>
               </div>
             </div>
             <div className="activity-item">
-              <span className="activity-icon">⚠️</span>
+              <span className="activity-icon"><FiAlertTriangle /></span>
               <div>
                 <p className="activity-title">Modification requise</p>
                 <p className="activity-meta">INF-201 • 23 Octobre</p>
@@ -177,7 +178,7 @@ export default async function TableauDeBordChefDeClasse() {
                 <strong>{fichesIncompletes} fiche(s) incomplète(s)</strong>
               </p>
               <p>
-                Le volume horaire n'a pas atteint l'objectif. Consultez le chef de département
+                Le volume horaire n&apos;a pas atteint l&apos;objectif. Consultez le chef de département
                 pour la clôturation.
               </p>
             </div>

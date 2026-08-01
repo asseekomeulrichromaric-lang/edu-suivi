@@ -2,6 +2,7 @@
 // chefs de classe) pour remplir les menus déroulants, PUIS on affiche un formulaire
 // "client" (interactif) pour la saisie et l'envoi.
 
+import { FiBookOpen, FiPlusCircle } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import { FormulaireNouvelleAffectation } from "./FormulaireNouvelleAffectation";
@@ -19,9 +20,9 @@ export default async function NouvelleAffectationPage() {
 
   return (
     <div style={{ maxWidth: 560, margin: "40px auto", padding: "0 16px" }}>
-      <h1>Nouvelle affectation pédagogique</h1>
+      <h1><FiPlusCircle /> Nouvelle affectation pédagogique</h1>
       <p style={{ color: "var(--ardoise)" }}>
-        Une fiche de suivi sera automatiquement créée pour cette affectation.
+        <FiBookOpen /> Une fiche de suivi sera automatiquement créée pour cette affectation.
       </p>
       <FormulaireNouvelleAffectation
         matieres={matieres}

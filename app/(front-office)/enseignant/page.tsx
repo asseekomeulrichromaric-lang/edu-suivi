@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FiCheckSquare, FiXCircle } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import "@/app/(front-office)/styles/enseignant.css";
@@ -74,7 +75,7 @@ export default async function TableauDeBordEnseignant() {
                   <div key={seance.id} className="seance-item attente">
                     <div className="seance-info">
                       <p className="seance-matiere">
-                        📋 {seance.fiche.affectation.matiere.nom}
+                        <FiCheckSquare /> {seance.fiche.affectation.matiere.nom}
                       </p>
                       <p className="seance-time">
                         {new Date(seance.date).toLocaleDateString("fr-FR")} • {seance.heureDebut} – {seance.heureFin}
@@ -82,8 +83,8 @@ export default async function TableauDeBordEnseignant() {
                       <p className="seance-contenu">{seance.contenu}</p>
                     </div>
                     <div className="seance-actions">
-                      <button className="btn-refuse">✗ REFUSER</button>
-                      <button className="btn-valider">✓ VALIDER</button>
+                      <button className="btn-refuse"><FiXCircle /> REFUSER</button>
+                      <button className="btn-valider"><FiCheckSquare /> VALIDER</button>
                     </div>
                   </div>
                 ))}

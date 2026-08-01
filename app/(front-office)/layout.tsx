@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FiBookOpen, FiFileText, FiClipboard, FiCheckCircle, FiSettings, FiUser, FiLayers, FiBarChart2 } from "react-icons/fi";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import "@/app/(front-office)/styles/layout.css";
 
@@ -22,7 +23,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
       {/* Barre latérale */}
       <nav className="sidebar-front">
         <div className="logo-section">
-          <div className="logo-icon">🎓</div>
+          <div className="logo-icon"><FiBookOpen /></div>
           <div>
             <h3>EduSuivi</h3>
             <p>Portail Académique</p>
@@ -32,12 +33,12 @@ export default async function FrontOfficeLayout({ children }: { children: React.
         <ul className="menu-principal">
           <li>
             <Link href={cheminPrincipal}>
-              📊 Accueil
+              <FiBarChart2 /> Accueil
             </Link>
           </li>
           <li>
             <Link href="/fiches">
-              📄 Fiches
+              <FiFileText /> Fiches
             </Link>
           </li>
 
@@ -45,7 +46,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
             <>
               <li>
                 <Link href="/chef-de-classe">
-                  📋 Tableau de bord
+                  <FiClipboard /> Tableau de bord
                 </Link>
               </li>
             </>
@@ -55,7 +56,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
             <>
               <li>
                 <Link href="/enseignant">
-                  ✓ Validations
+                  <FiCheckCircle /> Validations
                 </Link>
               </li>
             </>
@@ -65,12 +66,12 @@ export default async function FrontOfficeLayout({ children }: { children: React.
             <>
               <li>
                 <Link href="/chef-de-departement">
-                  📊 Tableau de bord
+                  <FiBarChart2 /> Tableau de bord
                 </Link>
               </li>
               <li>
                 <Link href="/affectations">
-                  📌 Affectations
+                  <FiLayers /> Affectations
                 </Link>
               </li>
             </>
@@ -80,7 +81,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
             <>
               <li>
                 <Link href="/admin">
-                  ⚙️ Administration
+                  <FiSettings /> Administration
                 </Link>
               </li>
             </>
@@ -89,7 +90,7 @@ export default async function FrontOfficeLayout({ children }: { children: React.
 
         <div className="user-profile">
           <Link href="/profil">
-            👤 {utilisateur.prenom} {utilisateur.nom}
+            <FiUser /> {utilisateur.prenom} {utilisateur.nom}
           </Link>
         </div>
       </nav>

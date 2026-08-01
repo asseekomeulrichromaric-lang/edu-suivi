@@ -1,15 +1,29 @@
 import Link from "next/link";
+import { FiBookOpen, FiClipboard, FiFileText, FiCheckCircle, FiAlertTriangle } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import { StatutBadge } from "@/components/ui/StatutBadge";
 import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
 import "@/app/(front-office)/styles/fiches.css";
 
+type FicheAvecRelations = {
+  id: string;
+  statut: "EN_COURS" | "INCOMPLETE" | "PRETE_A_SIGNER" | "VALIDEE_ARCHIVEE";
+  volumeHoraireRealise: number;
+  volumeHorairePrevu: number;
+  createdAt: Date;
+  affectation: {
+    matiere: { nom: string };
+    niveau: { filiere: { nom: string }; libelle: string };
+    enseignant: { prenom: string; nom: string };
+  };
+};
+
 export default async function ListeFichesPage() {
   const utilisateur = await getUtilisateurActuel();
   if (!utilisateur) return null;
 
-  let fiches: any[] = [];
+  let fiches: FicheAvecRelations[] = [];
 
   // Récupérer les fiches selon le rôle
   if (utilisateur.role === "CHEF_CLASSE") {
@@ -48,7 +62,7 @@ export default async function ListeFichesPage() {
 
   return (
     <div style={{ maxWidth: 1000, margin: "40px auto", padding: "0 16px" }}>
-      <h1>Mes fiches de suivi</h1>
+      <h1><FiFileText /> Mes fiches de suivi</h1>
       <p style={{ color: "var(--ardoise)", marginBottom: 24 }}>
         {fiches.length} fiche(s) — Filtrées selon votre rôle et département
       </p>
@@ -56,7 +70,7 @@ export default async function ListeFichesPage() {
       {/* Fiches en cours */}
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ marginBottom: 16 }}>
-          En cours ({groupes.EN_COURS.length})
+          <FiClipboard /> En cours ({groupes.EN_COURS.length})
         </h2>
         {groupes.EN_COURS.length === 0 ? (
           <p style={{ color: "var(--ardoise)" }}>Aucune fiche en cours.</p>
@@ -99,7 +113,7 @@ export default async function ListeFichesPage() {
       {utilisateur.role === "CHEF_DEPARTEMENT" && (
         <section style={{ marginBottom: 32 }}>
           <h2 style={{ marginBottom: 16 }}>
-            Incomplètes — Arbitrage requis ({groupes.INCOMPLETE.length})
+            <FiAlertTriangle /> Incomplètes — Arbitrage requis ({groupes.INCOMPLETE.length})
           </h2>
           {groupes.INCOMPLETE.length === 0 ? (
             <p style={{ color: "var(--ardoise)" }}>Aucune fiche incomplète.</p>
@@ -136,7 +150,7 @@ export default async function ListeFichesPage() {
       {/* Fiches prêtes pour signature */}
       <section style={{ marginBottom: 32 }}>
         <h2 style={{ marginBottom: 16 }}>
-          Prêtes pour signature ({groupes.PRETE_A_SIGNER.length})
+          <FiCheckCircle /> Prêtes pour signature ({groupes.PRETE_A_SIGNER.length})
         </h2>
         {groupes.PRETE_A_SIGNER.length === 0 ? (
           <p style={{ color: "var(--ardoise)" }}>Aucune fiche en attente de signature.</p>
@@ -172,7 +186,7 @@ export default async function ListeFichesPage() {
       {/* Fiches validées et archivées */}
       <section>
         <h2 style={{ marginBottom: 16 }}>
-          Validées et archivées ({groupes.VALIDEE_ARCHIVEE.length})
+          <FiBookOpen /> Validées et archivées ({groupes.VALIDEE_ARCHIVEE.length})
         </h2>
         {groupes.VALIDEE_ARCHIVEE.length === 0 ? (
           <p style={{ color: "var(--ardoise)" }}>Aucune fiche archivée.</p>

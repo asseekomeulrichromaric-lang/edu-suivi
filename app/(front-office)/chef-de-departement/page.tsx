@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FiAlertTriangle, FiCheckCircle, FiEye, FiFileText, FiPlusCircle } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import { getSession } from "@/lib/auth";
@@ -27,7 +28,7 @@ export default async function TableauDeBordChefDeDepartement() {
 
   return (
     <div style={{ maxWidth: 900, margin: "40px auto", padding: "0 16px" }}>
-      <h1>Bonjour, {utilisateur.prenom} {utilisateur.nom}</h1>
+      <h1><FiFileText /> Bonjour, {utilisateur.prenom} {utilisateur.nom}</h1>
       <p style={{ color: "var(--ardoise)" }}>Chef de département</p>
 
       <div style={{ display: "flex", gap: 16, margin: "24px 0" }}>
@@ -46,10 +47,10 @@ export default async function TableauDeBordChefDeDepartement() {
       </div>
 
       <Link href="/chef-de-departement/affectations/nouvelle" className="bouton-principal" style={{ display: "inline-block", marginBottom: 24 }}>
-        + Nouvelle affectation
+        <FiPlusCircle /> Nouvelle affectation
       </Link>
 
-      <h2>Fiches incomplètes — arbitrage requis ({fichesIncompletes.length})</h2>
+      <h2><FiAlertTriangle /> Fiches incomplètes — arbitrage requis ({fichesIncompletes.length})</h2>
       {fichesIncompletes.length === 0 && <p style={{ color: "var(--ardoise)" }}>Aucune fiche incomplète.</p>}
       {fichesIncompletes.map((f) => (
         <div key={f.id} className="carte" style={{ marginBottom: 12, borderLeft: "4px solid var(--statut-refusee-fg)" }}>
@@ -64,7 +65,7 @@ export default async function TableauDeBordChefDeDepartement() {
         </div>
       ))}
 
-      <h2 style={{ marginTop: 32 }}>Fiches prêtes pour signature ({fichesPretes.length})</h2>
+      <h2 style={{ marginTop: 32 }}><FiCheckCircle /> Fiches prêtes pour signature ({fichesPretes.length})</h2>
       {fichesPretes.length === 0 && <p style={{ color: "var(--ardoise)" }}>Aucune fiche en attente de réception.</p>}
       {fichesPretes.map((f) => (
         <div
@@ -81,7 +82,7 @@ export default async function TableauDeBordChefDeDepartement() {
                 {f.affectation.enseignant.prenom} {f.affectation.enseignant.nom}
               </p>
               <Link href={`/fiches/${f.id}`} style={{ fontSize: 12, color: "var(--encre)" }}>
-                Voir la fiche complète →
+                <FiEye /> Voir la fiche complète →
               </Link>
             </div>
             <StatutBadge statut={f.statut} />
