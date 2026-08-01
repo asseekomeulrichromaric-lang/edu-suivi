@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { estChefDeDepartement, estChefDeClasse } from "@/lib/permissions";
+import { estChefDeDepartement, estChefDeClasse, estEnseignant } from "@/lib/permissions";
 import PDFDocument from "pdfkit";
 
 export async function GET(
@@ -11,7 +11,7 @@ export async function GET(
   const session = await getSession();
 
   // Vérifier que l'utilisateur est autorisé à télécharger cette fiche
-  if (!session || (!estChefDeDepartement(session.role) && !estChefDeClasse(session.role))) {
+  if (!session) {
     return new Response("Accès refusé", { status: 403 });
   }
 
@@ -29,7 +29,12 @@ export async function GET(
   }
 
   // Vérifier que l'utilisateur peut voir cette fiche
-  if (estChefDeClasse(session.role) && fiche.chefClasseId !== session.utilisateurId) {
+  const peutAcceder =
+    estChefDeDepartement(session.role) ||
+    (estChefDeClasse(session.role) && fiche.chefClasseId === session.utilisateurId) ||
+    (estEnseignant(session.role) && fiche.affectation.enseignantId === session.utilisateurId);
+
+  if (!peutAcceder) {
     return new Response("Accès refusé à cette fiche", { status: 403 });
   }
 

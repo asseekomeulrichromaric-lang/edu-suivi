@@ -2,10 +2,11 @@ import { notFound } from "next/navigation";
 import { FiDownload } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { estChefDeDepartement } from "@/lib/permissions";
+import { estChefDeDepartement, estEnseignant } from "@/lib/permissions";
 import { StatutBadge } from "@/components/ui/StatutBadge";
 import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
 import { BoutonTelechargerEtConfirmer } from "@/components/front-office/BoutonTelechargerEtConfirmer";
+import { ActionsSeance } from "@/components/front-office/ActionsSeance";
 
 const LIBELLES_EVENEMENT: Record<string, string> = {
   CREATION: "Création",
@@ -103,6 +104,9 @@ export default async function DetailFichePage({ params }: { params: Promise<{ id
             <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--statut-refusee-fg)" }}>
               Motif du refus : {s.motifRefus}
             </p>
+          )}
+          {session && estEnseignant(session.role) && s.statut === "EN_ATTENTE" && fiche.affectation.enseignantId === session.utilisateurId && (
+            <ActionsSeance seanceId={s.id} />
           )}
         </div>
       ))}
