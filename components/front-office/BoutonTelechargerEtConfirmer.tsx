@@ -27,13 +27,18 @@ export function BoutonTelechargerEtConfirmer({ ficheId, peutConfirmerArchivage }
         return;
       }
 
-      const lien = document.createElement("a");
-      lien.href = `/api/fiches/${ficheId}/pdf`;
-      lien.target = "_blank";
-      lien.rel = "noopener noreferrer";
-      document.body.appendChild(lien);
-      lien.click();
-      document.body.removeChild(lien);
+      const url = `/api/fiches/${ficheId}/pdf`;
+      const nouvelleFenetre = window.open(url, "_blank", "noopener,noreferrer");
+
+      if (!nouvelleFenetre) {
+        const lien = document.createElement("a");
+        lien.href = url;
+        lien.target = "_blank";
+        lien.rel = "noopener noreferrer";
+        document.body.appendChild(lien);
+        lien.click();
+        document.body.removeChild(lien);
+      }
 
       router.refresh();
     } finally {
