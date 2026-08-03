@@ -3,6 +3,8 @@ import { getSession } from "@/lib/auth";
 import { estChefDeDepartement, estChefDeClasse, estEnseignant } from "@/lib/permissions";
 import PDFDocument from "pdfkit";
 
+export const runtime = "nodejs";
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
