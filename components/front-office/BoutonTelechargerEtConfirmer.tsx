@@ -19,16 +19,26 @@ export function BoutonTelechargerEtConfirmer({ ficheId, peutConfirmerArchivage }
   async function telecharger() {
     setEnCours(true);
     setErreur(null);
-    const reponse = await fetch(`/api/fiches/${ficheId}/telechargement`, { method: "POST" });
-    setEnCours(false);
-    if (!reponse.ok) {
-      setErreur("Erreur lors de la trace de téléchargement.");
-      return;
+
+    try {
+      const reponse = await fetch(`/api/fiches/${ficheId}/telechargement`, { method: "POST" });
+      if (!reponse.ok) {
+        setErreur("Erreur lors de la trace de téléchargement.");
+        return;
+      }
+
+      const lien = document.createElement("a");
+      lien.href = `/api/fiches/${ficheId}/pdf`;
+      lien.target = "_blank";
+      lien.rel = "noopener noreferrer";
+      document.body.appendChild(lien);
+      lien.click();
+      document.body.removeChild(lien);
+
+      router.refresh();
+    } finally {
+      setEnCours(false);
     }
-    // Dans une version complète, ceci déclencherait le téléchargement réel du PDF
-    // (route GET dédiée qui génère le fichier). Pour l'instant on informe l'utilisateur.
-    alert("Téléchargement tracé. Le PDF est prêt à être imprimé et signé à la main.");
-    router.refresh();
   }
 
   async function confirmerArchivage() {

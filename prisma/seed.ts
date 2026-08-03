@@ -32,6 +32,9 @@ async function main() {
       { nom: "Gestion de projet", volumeHoraireReference: 18, departementId: departement.id },
       { nom: "Mathématiques appliquées", volumeHoraireReference: 20, departementId: departement.id },
       { nom: "Marketing digital", volumeHoraireReference: 16, departementId: departement.id },
+      { nom: "Structure de données", volumeHoraireReference: 24, departementId: departement.id },
+      { nom: "Anglais", volumeHoraireReference: 16, departementId: departement.id },
+      { nom: "Gestion de données massives", volumeHoraireReference: 20, departementId: departement.id },
     ],
   });
 

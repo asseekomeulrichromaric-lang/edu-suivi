@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FiBookOpen, FiLogIn } from "react-icons/fi";
 
 export default function PageConnexion() {
   const router = useRouter();
@@ -44,7 +45,9 @@ export default function PageConnexion() {
 
   return (
     <div style={{ maxWidth: 380, margin: "80px auto", padding: "0 16px" }}>
-      <h1 style={{ textAlign: "center", fontSize: 26 }}>EduSuivi</h1>
+      <h1 style={{ textAlign: "center", fontSize: 26, display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
+        <FiBookOpen size={24} /> EduSuivi
+      </h1>
       <p style={{ textAlign: "center", color: "var(--ardoise)", fontStyle: "italic" }}>
         « Le suivi pédagogique, sans papier ni oubli. »
       </p>
@@ -75,7 +78,8 @@ export default function PageConnexion() {
 
         {erreur && <p style={{ color: "var(--statut-refusee-fg)", fontSize: 14 }}>{erreur}</p>}
 
-        <button type="submit" className="bouton-principal" style={{ width: "100%" }} disabled={enCours}>
+        <button type="submit" className="bouton-principal" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }} disabled={enCours}>
+          <FiLogIn size={16} />
           {enCours ? "Connexion..." : "Se connecter"}
         </button>
       </form>

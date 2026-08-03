@@ -11,6 +11,33 @@ export default async function NouvelleAffectationPage() {
   const utilisateur = await getUtilisateurActuel();
   if (!utilisateur || !utilisateur.departementId) return null;
 
+  const matieresDemandees = [
+    "Structure de données",
+    "Gestion de projet",
+    "Anglais",
+    "Analyse de données",
+    "Gestion de données massives",
+  ];
+
+  for (const nomMatiere of matieresDemandees) {
+    const matiereExistante = await prisma.matiere.findFirst({
+      where: {
+        departementId: utilisateur.departementId,
+        nom: { equals: nomMatiere, mode: "insensitive" },
+      },
+    });
+
+    if (!matiereExistante) {
+      await prisma.matiere.create({
+        data: {
+          nom: nomMatiere,
+          volumeHoraireReference: 24,
+          departementId: utilisateur.departementId,
+        },
+      });
+    }
+  }
+
   const [matieres, niveaux, enseignants, chefsDeClasse] = await Promise.all([
     prisma.matiere.findMany({ where: { departementId: utilisateur.departementId } }),
     prisma.niveau.findMany({ where: { filiere: { departementId: utilisateur.departementId } } }),
