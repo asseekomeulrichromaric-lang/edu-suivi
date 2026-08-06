@@ -192,6 +192,18 @@ export default async function TableauDeBordChefDeClasse() {
                       >
                         Refusée
                       </span>
+                      <Link
+                        href={`/chef-de-classe/seances/${seance.id}/modifier`}
+                        className="bouton-principal"
+                        style={{
+                          padding: "8px 16px",
+                          fontSize: 13,
+                          textDecoration: "none",
+                          display: "inline-block",
+                        }}
+                      >
+                        Modifier
+                      </Link>
                     </div>
                   </div>
                 ))}
