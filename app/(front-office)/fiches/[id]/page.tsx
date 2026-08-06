@@ -1,21 +1,27 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FiDownload } from "react-icons/fi";
+import { FiArrowLeft, FiDownload } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { estChefDeDepartement, estEnseignant } from "@/lib/permissions";
-import { StatutBadge } from "@/components/ui/StatutBadge";
-import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
-import { BoutonTelechargerEtConfirmer } from "@/components/front-office/BoutonTelechargerEtConfirmer";
-import { ActionsSeance } from "@/components/front-office/ActionsSeance";
+import { estChefDeDepartement, estChefDeClasse, estEnseignant } from "@/lib/permissions";
+import { calculerDureeHeures, calculerProgression } from "@/lib/volume-horaire";
+import {
+  FicheEnTete,
+  FicheTitre,
+  FicheBandeau,
+  FicheInfos,
+  FicheSeances,
+  FicheSignatures,
+  FicheProcedure,
+  FicheTracabilite,
+} from "@/components/front-office/fiche-officielle";
+import "@/app/(front-office)/styles/fiche-officielle.css";
 
-const LIBELLES_EVENEMENT: Record<string, string> = {
-  CREATION: "Création",
-  VALIDATION_SEANCE: "Séance validée",
-  REFUS_SEANCE: "Séance refusée",
-  TELECHARGEMENT_PDF: "PDF téléchargé pour signature",
-  CONFIRMATION_ARCHIVAGE: "Archivage confirmé",
-  CLOTURE_INCOMPLETE: "Fiche clôturée (incomplète)",
-  PROLONGATION: "Prolongation accordée",
+const LIBELLES_ROLE: Record<string, string> = {
+  ADMINISTRATEUR: "Administrateur",
+  CHEF_DEPARTEMENT: "Chef de département",
+  ENSEIGNANT: "Enseignant",
+  CHEF_CLASSE: "Chef de classe",
 };
 
 export default async function DetailFichePage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,60 +31,66 @@ export default async function DetailFichePage({ params }: { params: Promise<{ id
   const fiche = await prisma.fiche.findUnique({
     where: { id },
     include: {
-      affectation: { include: { matiere: true, niveau: { include: { filiere: true } }, enseignant: true } },
+      affectation: {
+        include: {
+          matiere: true,
+          niveau: { include: { filiere: true } },
+          enseignant: true,
+        },
+      },
       chefClasse: true,
-      seances: { orderBy: { date: "desc" } },
-      evenements: { orderBy: { horodatage: "desc" }, include: { auteur: true } },
+      seances: { orderBy: { date: "asc" } },
     },
   });
 
   if (!fiche) notFound();
 
-  return (
-    <div style={{ maxWidth: 900, margin: "40px auto", padding: "0 16px" }}>
-      <p className="reference-mono" style={{ color: "var(--ardoise)", fontSize: 13 }}>{fiche.reference}</p>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <h1 style={{ margin: "0 0 4px" }}>{fiche.affectation.matiere.nom}</h1>
-          <p style={{ color: "var(--ardoise)", margin: 0 }}>
-            {fiche.affectation.niveau.filiere.nom} — {fiche.affectation.niveau.libelle}
-          </p>
-        </div>
-        <StatutBadge statut={fiche.statut} />
-      </div>
+  const peutAcceder =
+    estChefDeDepartement(session?.role ?? "") ||
+    (estChefDeClasse(session?.role ?? "") && fiche.chefClasseId === session?.utilisateurId) ||
+    (estEnseignant(session?.role ?? "") && fiche.affectation.enseignantId === session?.utilisateurId);
 
-      <div className="carte" style={{ margin: "20px 0" }}>
-        <p style={{ margin: "0 0 4px", fontSize: 13, color: "var(--ardoise)" }}>
-          Enseignant : {fiche.affectation.enseignant.prenom} {fiche.affectation.enseignant.nom} — Chef de
-          classe : {fiche.chefClasse.prenom} {fiche.chefClasse.nom}
+  if (!peutAcceder) {
+    return (
+      <div style={{ textAlign: "center", marginTop: 80 }}>
+        <h1>Accès refusé</h1>
+        <p style={{ color: "var(--ardoise)" }}>
+          {`Vous n'avez pas accès à cette fiche.`}
         </p>
-        <div style={{ marginTop: 12 }}>
-          <ProgressionVolumeHoraire realise={fiche.volumeHoraireRealise} prevu={fiche.volumeHorairePrevu} />
-        </div>
+        <Link href="/fiches" className="bouton-principal">Retour aux fiches</Link>
       </div>
+    );
+  }
 
-      {fiche.statut === "PRETE_A_SIGNER" && session && (
-        <div className="carte" style={{ marginBottom: 20, background: "#FAEEDA", borderColor: "#C77D2E" }}>
-          <p style={{ margin: "0 0 12px" }}>
-            Le volume horaire est atteint. Cette fiche doit être imprimée, signée à la main par le
-            chef de classe et l'enseignant, puis remise au chef de département.
-          </p>
-          <BoutonTelechargerEtConfirmer
-            ficheId={fiche.id}
-            peutConfirmerArchivage={estChefDeDepartement(session.role)}
-          />
-        </div>
-      )}
+  const anneeAcademique = fiche.affectation.anneeAcademique.replace("-", " – ");
+  const progression = calculerProgression(fiche.volumeHoraireRealise, fiche.volumeHorairePrevu);
+  const seancesValidees = fiche.seances.filter((s) => s.statut === "VALIDEE");
+  const totalDuree = seancesValidees.reduce(
+    (total, s) => total + calculerDureeHeures(s.heureDebut, s.heureFin),
+    0
+  );
+  const volumeAtteint = fiche.volumeHoraireRealise >= fiche.volumeHorairePrevu;
 
-      {(fiche.volumeHoraireRealise >= fiche.volumeHorairePrevu && 
-        session && (estChefDeDepartement(session.role) || fiche.chefClasseId === session.utilisateurId)) && (
-        <div className="carte" style={{ marginBottom: 20, background: "#EAF3DE", borderLeft: "4px solid #2F7D5A" }}>
-          <p style={{ margin: "0 0 12px", fontWeight: 600, color: "#1D3557" }}>
-            Télécharger la fiche
-          </p>
-          <p style={{ margin: "0 0 12px", color: "#6B7280", fontSize: 14 }}>
-            Le volume horaire est complété. Vous pouvez télécharger la fiche au format PDF pour la signer.
-          </p>
+  const statutTexte =
+    fiche.statut === "PRETE_A_SIGNER"
+      ? "PRÊTE POUR SIGNATURE — VOLUME HORAIRE ATTEINT"
+      : fiche.statut === "VALIDEE_ARCHIVEE"
+      ? "VALIDÉE ET ARCHIVÉE"
+      : fiche.statut === "INCOMPLETE"
+      ? "CLÔTURÉE (INCOMPLÈTE)"
+      : "EN COURS";
+
+  const dateTelechargement = new Date().toLocaleDateString("fr-FR");
+  const heureTelechargement = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+
+  return (
+    <div className="fiche-officielle">
+      {/* Barre d'actions */}
+      <div className="fiche-actions">
+        <Link href="/fiches" className="btn-retour">
+          <FiArrowLeft /> Retour aux fiches
+        </Link>
+        {volumeAtteint && (
           <a
             href={`/api/fiches/${fiche.id}/pdf`}
             download={`${fiche.reference}.pdf`}
@@ -87,43 +99,42 @@ export default async function DetailFichePage({ params }: { params: Promise<{ id
           >
             <FiDownload /> Télécharger en PDF
           </a>
-        </div>
-      )}
+        )}
+      </div>
 
-      <h2>Séances ({fiche.seances.length})</h2>
-      {fiche.seances.map((s) => (
-        <div key={s.id} className="carte" style={{ marginBottom: 8 }}>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <p className="reference-mono" style={{ margin: 0, fontSize: 13 }}>
-              {new Date(s.date).toLocaleDateString("fr-FR")} • {s.heureDebut}–{s.heureFin}
-            </p>
-            <StatutBadge statut={s.statut} />
-          </div>
-          <p style={{ margin: "6px 0 0", fontSize: 14 }}>{s.contenu}</p>
-          {s.motifRefus && (
-            <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--statut-refusee-fg)" }}>
-              Motif du refus : {s.motifRefus}
-            </p>
-          )}
-          {session && estEnseignant(session.role) && s.statut === "EN_ATTENTE" && fiche.affectation.enseignantId === session.utilisateurId && (
-            <ActionsSeance seanceId={s.id} />
-          )}
-        </div>
-      ))}
-
-      <h2 style={{ marginTop: 32 }}>Historique</h2>
-      <div className="carte">
-        {fiche.evenements.map((e) => (
-          <div key={e.id} style={{ padding: "8px 0", borderBottom: "1px solid #eee" }}>
-            <p style={{ margin: 0, fontWeight: 600, fontSize: 14 }}>
-              {LIBELLES_EVENEMENT[e.typeEvenement] ?? e.typeEvenement}
-            </p>
-            <p style={{ margin: 0, fontSize: 12, color: "var(--ardoise)" }}>
-              {new Date(e.horodatage).toLocaleString("fr-FR")} — {e.auteur.prenom} {e.auteur.nom}
-            </p>
-            {e.details && <p style={{ margin: "4px 0 0", fontSize: 13 }}>{e.details}</p>}
-          </div>
-        ))}
+      {/* Document officiel */}
+      <div style={{ background: "white", border: "1px solid #e5e3dc", borderRadius: 4, padding: "40px 48px" }}>
+        <FicheEnTete anneeAcademique={anneeAcademique} filiere={fiche.affectation.niveau.filiere.nom} />
+        <FicheTitre reference={fiche.reference} />
+        <FicheBandeau statutTexte={statutTexte} />
+        <FicheInfos
+          filiere={fiche.affectation.niveau.filiere.nom}
+          niveau={fiche.affectation.niveau.libelle}
+          matiere={fiche.affectation.matiere.nom}
+          enseignant={`${fiche.affectation.enseignant.prenom} ${fiche.affectation.enseignant.nom}`}
+          chefClasse={`${fiche.chefClasse.prenom} ${fiche.chefClasse.nom}`}
+          volumePrevu={fiche.volumeHorairePrevu}
+          volumeRealise={fiche.volumeHoraireRealise}
+          progression={progression}
+        />
+        <FicheSeances
+          seances={fiche.seances}
+          seancesValidees={seancesValidees.length}
+          totalDuree={totalDuree}
+          volumePrevu={fiche.volumeHorairePrevu}
+          progression={progression}
+        />
+        <FicheSignatures
+          chefClasse={`${fiche.chefClasse.prenom} ${fiche.chefClasse.nom}`}
+          enseignant={`${fiche.affectation.enseignant.prenom} ${fiche.affectation.enseignant.nom}`}
+        />
+        <FicheProcedure />
+        <FicheTracabilite
+          reference={fiche.reference}
+          utilisateur={`${fiche.chefClasse.prenom} ${fiche.chefClasse.nom}`}
+          role={LIBELLES_ROLE[fiche.chefClasse.role] ?? "Utilisateur"}
+          date={`${dateTelechargement} à ${heureTelechargement}`}
+        />
       </div>
     </div>
   );

@@ -9,11 +9,6 @@ const LIBELLES_ROLE: Record<string, string> = {
   CHEF_CLASSE: "Chef de classe",
 };
 
-const STATUT_BADGE: Record<string, "actif" | "suspendu"> = {
-  actif: "actif",
-  suspendu: "suspendu",
-};
-
 export default async function GestionUtilisateurs() {
   const utilisateurs = await prisma.utilisateur.findMany({
     include: { departement: true },
@@ -50,11 +45,11 @@ export default async function GestionUtilisateurs() {
               </div>
               <div className="personnel-actions">
                 <Link href={`/admin/utilisateurs/${user.id}`} className="btn-mini">
-                  Éditer
+                  Détails
                 </Link>
-                <button className="btn-mini">
-                  Suspendre
-                </button>
+                <Link href={`/admin/utilisateurs/${user.id}/modifier`} className="btn-mini">
+                  Modifier
+                </Link>
               </div>
             </div>
           ))}

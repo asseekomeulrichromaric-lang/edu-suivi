@@ -1,0 +1,305 @@
+/* Page de visualisation de la fiche au format officiel */
+
+.fiche-officielle {
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+/* En-tête du document */
+.fiche-header {
+  border-bottom: 3px solid var(--encre);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.fiche-generateur {
+  font-size: 11px;
+  color: var(--ardoise);
+  margin: 0 0 16px 0;
+}
+
+.fiche-institution {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--encre);
+  margin: 0 0 4px 0;
+  font-family: var(--font-titres);
+}
+
+.fiche-institution-ligne {
+  font-size: 13px;
+  color: var(--ardoise);
+  margin: 0 0 2px 0;
+}
+
+.fiche-plateforme {
+  font-size: 12px;
+  color: var(--ardoise);
+  margin: 0 0 8px 0;
+}
+
+.fiche-annee {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--encre);
+  margin: 8px 0 0 0;
+}
+
+/* Titre */
+.fiche-titre {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.fiche-titre h1 {
+  font-size: 26px;
+  color: var(--encre);
+  margin: 0 0 4px 0;
+}
+
+.fiche-reference {
+  font-size: 13px;
+  color: var(--ardoise);
+  margin: 0 0 16px 0;
+}
+
+/* Bandeau statut */
+.fiche-bandeau {
+  background: #eaf3de;
+  border: 2px solid var(--statut-archivee-fg);
+  border-radius: 8px;
+  padding: 12px 16px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.fiche-bandeau h2 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  color: var(--statut-archivee-fg);
+}
+
+.fiche-bandeau p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ardoise);
+}
+
+/* Informations principales */
+.fiche-infos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  background: white;
+  border: 1px solid #e5e3dc;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.fiche-info-bloc h4 {
+  margin: 0 0 4px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--encre);
+}
+
+.fiche-info-bloc p {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+
+.fiche-info-bloc p:last-child {
+  margin-bottom: 0;
+}
+
+/* Tableau des séances */
+.fiche-seances {
+  background: white;
+  border: 1px solid #e5e3dc;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.fiche-seances h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: var(--encre);
+}
+
+.fiche-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.fiche-table th {
+  background: var(--papier);
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--encre);
+  border-bottom: 2px solid var(--encre);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.fiche-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e3dc;
+  vertical-align: top;
+}
+
+.fiche-table tr:last-child td {
+  border-bottom: none;
+}
+
+.fiche-table .statut-validee {
+  color: var(--statut-validee-fg);
+  font-weight: 600;
+}
+
+.fiche-table .statut-attente {
+  color: var(--statut-attente-fg);
+  font-weight: 600;
+}
+
+.fiche-table .statut-refusee {
+  color: var(--statut-refusee-fg);
+  font-weight: 600;
+}
+
+.fiche-total {
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--encre);
+  background: var(--papier);
+  padding: 12px;
+  border-radius: 6px;
+}
+
+/* Signatures */
+.fiche-signatures {
+  background: white;
+  border: 1px solid #e5e3dc;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.fiche-signatures h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  color: var(--encre);
+}
+
+.fiche-signature-intro {
+  font-size: 13px;
+  color: var(--ardoise);
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.fiche-signature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.fiche-signature-bloc {
+  border: 1px solid #e5e3dc;
+  border-radius: 8px;
+  padding: 16px;
+  background: var(--papier);
+}
+
+.fiche-signature-bloc h4 {
+  margin: 0 0 4px 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--encre);
+}
+
+.fiche-signature-bloc .nom {
+  font-size: 14px;
+  margin: 0 0 16px 0;
+}
+
+.fiche-signature-bloc .ligne {
+  font-size: 13px;
+  color: var(--ardoise);
+  margin: 0 0 8px 0;
+}
+
+/* Procédure d'archivage */
+.fiche-procedure {
+  background: var(--papier);
+  border-left: 4px solid var(--ardoise);
+  padding: 16px;
+  border-radius: 0 8px 8px 0;
+  margin-bottom: 24px;
+}
+
+.fiche-procedure p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ardoise);
+  line-height: 1.6;
+}
+
+/* Traçabilité */
+.fiche-tracabilite {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* Actions (retour, téléchargement) */
+.fiche-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--encre);
+  text-decoration: none;
+}
+
+.btn-retour:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fiche-infos {
+    grid-template-columns: 1fr;
+  }
+
+  .fiche-signature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fiche-table {
+    font-size: 12px;
+  }
+
+  .fiche-table th,
+  .fiche-table td {
+    padding: 8px;
+  }
+}

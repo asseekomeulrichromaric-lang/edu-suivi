@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FiCheckSquare, FiXCircle, FiCheckCircle, FiEdit3, FiAlertTriangle } from "react-icons/fi";
+import { FiCheckSquare, FiCheckCircle, FiEdit3, FiAlertTriangle } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
@@ -112,10 +112,25 @@ export default async function TableauDeBordChefDeClasse() {
                         {new Date(seance.date).toLocaleDateString("fr-FR")} •{" "}
                         {seance.heureDebut} – {seance.heureFin}
                       </p>
+                      <p className="seance-contenu" style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ardoise)" }}>
+                        {seance.contenu}
+                      </p>
                     </div>
                     <div className="seance-actions">
-                      <button className="btn-refuse"><FiXCircle /> REFUSER</button>
-                      <button className="btn-valider"><FiCheckSquare /> VALIDER</button>
+                      <span
+                        style={{
+                          display: "inline-block",
+                          padding: "4px 10px",
+                          borderRadius: 4,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          background: "var(--statut-attente-bg)",
+                          color: "var(--statut-attente-fg)",
+                          border: "1px solid var(--statut-attente-fg)",
+                        }}
+                      >
+                        En cours
+                      </span>
                     </div>
                   </div>
                 ))}

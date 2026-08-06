@@ -1,9 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { estChefDeDepartement, estChefDeClasse, estEnseignant } from "@/lib/permissions";
+import { calculerDureeHeures, calculerProgression } from "@/lib/volume-horaire";
 import PDFDocument from "pdfkit";
 
 export const runtime = "nodejs";
+
+const LIBELLES_STATUT_SEANCE: Record<string, string> = {
+  EN_ATTENTE: "En attente",
+  VALIDEE: "Validée",
+  REFUSEE: "Refusée",
+};
 
 export async function GET(
   request: Request,
@@ -14,15 +21,21 @@ export async function GET(
 
   // Vérifier que l'utilisateur est autorisé à télécharger cette fiche
   if (!session) {
-    return new Response("Accès refusé", { status: 403 });
+    return Response.json({ erreur: "Accès refusé : session introuvable." }, { status: 403 });
   }
 
   const fiche = await prisma.fiche.findUnique({
     where: { id },
     include: {
-      affectation: { include: { matiere: true, niveau: { include: { filiere: true } }, enseignant: true } },
+      affectation: {
+        include: {
+          matiere: true,
+          niveau: { include: { filiere: true } },
+          enseignant: true,
+        },
+      },
       chefClasse: true,
-      seances: { orderBy: { date: "desc" } },
+      seances: { orderBy: { date: "asc" } },
     },
   });
 
@@ -43,167 +56,358 @@ export async function GET(
   try {
     return new Promise((resolve) => {
       const doc = new PDFDocument({
-        margin: 40,
+        margin: 50,
         size: "A4",
+        bufferPages: true,
       });
 
       const buffer: Buffer[] = [];
       doc.on("data", (chunk) => buffer.push(chunk));
 
-      // En-tête
-      doc
-        .fontSize(10)
-        .text("INSG - Fiche de Suivi", { align: "center" })
-        .moveDown(0.5);
+      const largeurPage = doc.page.width - 100; // marges gauche + droite
+      const anneeAcademique = fiche.affectation.anneeAcademique.replace("-", " – ");
+      const progression = calculerProgression(fiche.volumeHoraireRealise, fiche.volumeHorairePrevu);
+      const seancesValidees = fiche.seances.filter((s) => s.statut === "VALIDEE");
+      const totalDuree = seancesValidees.reduce(
+        (total, s) => total + calculerDureeHeures(s.heureDebut, s.heureFin),
+        0
+      );
 
-      // Référence de fiche
+      // ===== EN-TÊTE =====
       doc
-        .fontSize(9)
+        .fontSize(7)
         .fillColor("#6B7280")
-        .text(`REF : ${fiche.reference}`, { align: "left" })
-        .moveDown(0.5)
-        .fillColor("#000");
+        .text(
+          "Document généré par la plateforme EduSuivi — Institut National de Sciences de Gestion — page 1/1",
+          { align: "center" }
+        )
+        .moveDown(1.5);
 
-      // Titre principal
+      // Nom de l'institution
       doc
-        .fontSize(18)
+        .fontSize(16)
         .font("Helvetica-Bold")
-        .text(fiche.affectation.matiere.nom, { align: "left" })
+        .fillColor("#1D3557")
+        .text("INSTITUT NATIONAL DE SCIENCES DE GESTION", { align: "center" })
         .moveDown(0.3);
 
-      // Sous-titre
+      // Département et filière
       doc
-        .fontSize(11)
+        .fontSize(9)
         .font("Helvetica")
         .fillColor("#6B7280")
         .text(
-          `${fiche.affectation.niveau.filiere.nom} — ${fiche.affectation.niveau.libelle}`,
-          { align: "left" }
+          `Département — Filière ${fiche.affectation.niveau.filiere.nom}`,
+          { align: "center" }
         )
-        .moveDown(1)
-        .fillColor("#000");
+        .moveDown(0.2);
 
-      // Section Statut
+      // Plateforme
+      doc
+        .fontSize(8)
+        .fillColor("#6B7280")
+        .text("Plateforme EduSuivi — Système de suivi pédagogique", { align: "center" })
+        .moveDown(0.5);
+
+      // Année académique
+      doc
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text(`Année académique ${anneeAcademique}`, { align: "center" })
+        .moveDown(1);
+
+      // Ligne de séparation
+      doc
+        .strokeColor("#1D3557")
+        .lineWidth(1.5)
+        .moveTo(50, doc.y)
+        .lineTo(50 + largeurPage, doc.y)
+        .stroke()
+        .moveDown(1);
+
+      // ===== TITRE =====
+      doc
+        .fontSize(20)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("FICHE DE SUIVI PÉDAGOGIQUE", { align: "center" })
+        .moveDown(0.5);
+
+      // Référence
+      doc
+        .fontSize(10)
+        .font("Helvetica")
+        .fillColor("#6B7280")
+        .text(`N° de référence : ${fiche.reference}`, { align: "center" })
+        .moveDown(1);
+
+      // ===== BANDEAU STATUT =====
+      const statutTexte =
+        fiche.statut === "PRETE_A_SIGNER"
+          ? "PRÊTE POUR SIGNATURE — VOLUME HORAIRE ATTEINT"
+          : fiche.statut === "VALIDEE_ARCHIVEE"
+          ? "VALIDÉE ET ARCHIVÉE"
+          : fiche.statut === "INCOMPLETE"
+          ? "CLÔTURÉE (INCOMPLÈTE)"
+          : "EN COURS";
+
       doc
         .fontSize(10)
         .font("Helvetica-Bold")
         .fillColor("#2F7D5A")
-        .text("✓ Validée et archivée", { align: "left" })
-        .moveDown(1)
-        .fillColor("#000");
-
-      // Section Volume horaire
-      doc
-        .fontSize(10)
-        .font("Helvetica-Bold")
-        .text("VOLUME HORAIRE RÉALISÉ", { align: "left" })
+        .text(statutTexte, { align: "center" })
         .moveDown(0.3);
 
       doc
-        .fontSize(11)
+        .fontSize(8)
         .font("Helvetica")
-        .text(`${fiche.volumeHoraireRealise} / ${fiche.volumeHorairePrevu} Heures`, {
-          align: "left",
-        })
-        .moveDown(0.5);
-
-      // Barre de progression simple
-      const barWidth = 200;
-      const filledWidth = (fiche.volumeHoraireRealise / fiche.volumeHorairePrevu) * barWidth;
-      doc
-        .strokeColor("#2B6CB0")
-        .lineWidth(2)
-        .moveTo(40, doc.y)
-        .lineTo(40 + filledWidth, doc.y)
-        .stroke();
-      doc
-        .strokeColor("#E0E0E0")
-        .lineWidth(2)
-        .moveTo(40 + filledWidth, doc.y)
-        .lineTo(40 + barWidth, doc.y)
-        .stroke();
-      doc.moveDown(1.5);
-
-      // Informations principales
-      doc
-        .fontSize(9)
         .fillColor("#6B7280")
         .text(
-          `Enseignant : ${fiche.affectation.enseignant.prenom} ${fiche.affectation.enseignant.nom}`,
-          { align: "left" }
+          "Ce document doit être imprimé, signé à la main par le chef de classe et l'enseignant, puis remis au chef de département pour archivage officiel.",
+          { align: "center", width: largeurPage }
         )
-        .text(
-          `Chef de classe : ${fiche.chefClasse.prenom} ${fiche.chefClasse.nom}`,
-          { align: "left" }
-        )
-        .text(`Date limite : ${new Date(fiche.dateLimiteSemestre).toLocaleDateString("fr-FR")}`, {
-          align: "left",
-        })
-        .moveDown(1)
-        .fillColor("#000");
+        .moveDown(1.5);
 
-      // Section Journal des séances
+      // ===== INFORMATIONS PRINCIPALES =====
+      const infoY = doc.y;
+      const colGaucheX = 50;
+      const colDroiteX = 50 + largeurPage / 2;
+
+      // Colonne gauche
+      doc
+        .fontSize(8)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("FILIÈRE / NIVEAU", colGaucheX, infoY)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(
+          `${fiche.affectation.niveau.filiere.nom} — ${fiche.affectation.niveau.libelle}`,
+          colGaucheX,
+          doc.y + 2
+        )
+        .moveDown(0.8)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("MATIÈRE", colGaucheX)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(fiche.affectation.matiere.nom, colGaucheX, doc.y + 2)
+        .moveDown(0.8)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("ENSEIGNANT", colGaucheX)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(
+          `${fiche.affectation.enseignant.prenom} ${fiche.affectation.enseignant.nom}`,
+          colGaucheX,
+          doc.y + 2
+        )
+        .moveDown(0.8)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("CHEF DE CLASSE", colGaucheX)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(
+          `${fiche.chefClasse.prenom} ${fiche.chefClasse.nom}`,
+          colGaucheX,
+          doc.y + 2
+        );
+
+      // Colonne droite
+      doc
+        .fontSize(8)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("VOLUME HORAIRE PRÉVU", colDroiteX, infoY)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(`${fiche.volumeHorairePrevu} heures`, colDroiteX, doc.y + 2)
+        .moveDown(0.8)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("VOLUME HORAIRE RÉALISÉ", colDroiteX)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(
+          `${fiche.volumeHoraireRealise} heures (${progression}%)`,
+          colDroiteX,
+          doc.y + 2
+        );
+
+      doc.moveDown(2);
+
+      // ===== DÉTAIL DES SÉANCES =====
       doc
         .fontSize(12)
         .font("Helvetica-Bold")
-        .text("Journal des Séances", { align: "left" })
+        .fillColor("#1D3557")
+        .text("Détail des séances réalisées", { align: "left" })
         .moveDown(0.5);
+
+      // En-tête du tableau
+      const tableY = doc.y;
+      const colDateX = 50;
+      const colHoraireX = 110;
+      const colContenuX = 180;
+      const colDureeX = 400;
+      const colStatutX = 450;
+      const colFinX = 50 + largeurPage;
+
+      doc
+        .fontSize(8)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("Date", colDateX, tableY)
+        .text("Horaire", colHoraireX, tableY)
+        .text("Contenu de la séance", colContenuX, tableY)
+        .text("Durée", colDureeX, tableY)
+        .text("Statut", colStatutX, tableY);
+
+      // Ligne sous l'en-tête
+      doc
+        .strokeColor("#1D3557")
+        .lineWidth(0.5)
+        .moveTo(colDateX, tableY + 14)
+        .lineTo(colFinX, tableY + 14)
+        .stroke();
+
+      let yCourant = tableY + 20;
 
       if (fiche.seances.length === 0) {
         doc
-          .fontSize(10)
+          .fontSize(9)
+          .font("Helvetica")
           .fillColor("#6B7280")
-          .text("Aucune séance enregistrée.", { align: "left" })
-          .moveDown(1)
-          .fillColor("#000");
+          .text("Aucune séance enregistrée.", colDateX, yCourant);
       } else {
-        fiche.seances.forEach((seance, index) => {
-          if (index > 0) doc.moveDown(0.3);
+        fiche.seances.forEach((seance) => {
+          const duree = calculerDureeHeures(seance.heureDebut, seance.heureFin);
+          const statut = LIBELLES_STATUT_SEANCE[seance.statut] ?? seance.statut;
 
           doc
-            .fontSize(9)
-            .font("Helvetica-Bold")
-            .text(
-              `${new Date(seance.date).toLocaleDateString("fr-FR")} • ${seance.heureDebut} – ${seance.heureFin}`,
-              { align: "left" }
-            )
-            .fontSize(9)
+            .fontSize(8)
             .font("Helvetica")
-            .fillColor("#6B7280")
-            .text(seance.contenu, { align: "left", width: 400 })
-            .fillColor("#000");
+            .fillColor("#000")
+            .text(new Date(seance.date).toLocaleDateString("fr-FR"), colDateX, yCourant)
+            .text(
+              `${seance.heureDebut}–${seance.heureFin}`,
+              colHoraireX,
+              yCourant
+            )
+            .text(seance.contenu, colContenuX, yCourant, { width: colDureeX - colContenuX - 10 })
+            .text(`${duree}h`, colDureeX, yCourant)
+            .text(statut, colStatutX, yCourant);
 
-          if (seance.statut === "VALIDEE") {
-            doc
-              .fontSize(8)
-              .fillColor("#2B6CB0")
-              .text("✓ VALIDÉE", { align: "left" })
-              .fillColor("#000");
-          } else if (seance.statut === "REFUSEE") {
-            doc
-              .fontSize(8)
-              .fillColor("#B0413E")
-              .text("✗ REFUSÉE", { align: "left" })
-              .fillColor("#000");
-          }
+          // Ligne de séparation
+          doc
+            .strokeColor("#E0E0E0")
+            .lineWidth(0.3)
+            .moveTo(colDateX, yCourant + 14)
+            .lineTo(colFinX, yCourant + 14)
+            .stroke();
+
+          yCourant += 20;
         });
-
-        doc.moveDown(1);
       }
 
-      // Footer
+      doc.y = yCourant + 10;
+
+      // ===== TOTAL =====
+      doc
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text(
+          `Total : ${seancesValidees.length} séances validées — ${totalDuree} heures réalisées sur ${fiche.volumeHorairePrevu} heures prévues (${progression}%).`,
+          { align: "left" }
+        )
+        .moveDown(2);
+
+      // ===== SIGNATURES =====
+      doc
+        .fontSize(12)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("Signatures manuscrites", { align: "left" })
+        .moveDown(0.5);
+
       doc
         .fontSize(8)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(
+          "Le volume horaire prévu pour cet enseignement a été intégralement réalisé et les séances ci-dessus dûment validées. Les parties ci-dessous attestent, par leur signature manuscrite, de l'exactitude des informations consignées dans la présente fiche.",
+          { width: largeurPage }
+        )
+        .moveDown(1.5);
+
+      // Deux blocs de signature côte à côte
+      const sigY = doc.y;
+      const sigGaucheX = 50;
+      const sigDroiteX = 50 + largeurPage / 2;
+
+      doc
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("CHEF DE CLASSE", sigGaucheX, sigY)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(
+          `${fiche.chefClasse.prenom} ${fiche.chefClasse.nom}`,
+          sigGaucheX,
+          doc.y + 2
+        )
+        .moveDown(0.5)
+        .text("Signature : ________________________", sigGaucheX)
+        .moveDown(0.3)
+        .text("Date : _____ / _____ / _________", sigGaucheX);
+
+      doc
+        .fontSize(9)
+        .font("Helvetica-Bold")
+        .fillColor("#1D3557")
+        .text("ENSEIGNANT", sigDroiteX, sigY)
+        .font("Helvetica")
+        .fillColor("#000")
+        .text(
+          `${fiche.affectation.enseignant.prenom} ${fiche.affectation.enseignant.nom}`,
+          sigDroiteX,
+          doc.y + 2
+        )
+        .moveDown(0.5)
+        .text("Signature : ________________________", sigDroiteX)
+        .moveDown(0.3)
+        .text("Date : _____ / _____ / _________", sigDroiteX);
+
+      doc.moveDown(2);
+
+      // ===== PROCÉDURE D'ARCHIVAGE =====
+      doc
+        .fontSize(8)
+        .font("Helvetica")
         .fillColor("#6B7280")
-        .text("© 2024 Institut National de Sciences de Gestion (INSG) • EduSuivi v2.4.0", {
-          align: "center",
-        })
-        .text(`Généré le ${new Date().toLocaleString("fr-FR")}`, {
-          align: "center",
-        });
+        .text(
+          "Procédure d'archivage : une fois signée par les deux parties, remettre ce document en main propre au chef de département, qui confirmera sa réception dans EduSuivi pour l'archiver officiellement. Le présent exemplaire papier est l'unique archive officielle.",
+          { width: largeurPage }
+        )
+        .moveDown(1);
 
-      doc.end();
+      // ===== TRACABILITÉ =====
+      doc
+        .fontSize(7)
+        .fillColor("#9CA3AF")
+        .text(
+          `Téléchargé le ${new Date().toLocaleDateString("fr-FR")} à ${new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })} par ${fiche.chefClasse.prenom} ${fiche.chefClasse.nom} (${fiche.chefClasse.role === "CHEF_CLASSE" ? "Chef de classe" : "Utilisateur"}) — Traçabilité : HIST-${fiche.reference}-DL`,
+          { align: "center" }
+        );
 
+      // IMPORTANT : enregistrer le listener "end" AVANT d'appeler doc.end(),
+      // sinon l'événement peut se déclencher avant que le listener soit attaché.
       doc.on("end", () => {
         const pdfBuffer = Buffer.concat(buffer);
         resolve(
@@ -215,6 +419,8 @@ export async function GET(
           })
         );
       });
+
+      doc.end();
     });
   } catch (erreur) {
     console.error("Erreur génération PDF:", erreur);

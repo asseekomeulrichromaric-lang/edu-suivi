@@ -27,18 +27,14 @@ export function BoutonTelechargerEtConfirmer({ ficheId, peutConfirmerArchivage }
         return;
       }
 
+      // Téléchargement direct via un lien <a> avec l'attribut download
       const url = `/api/fiches/${ficheId}/pdf`;
-      const nouvelleFenetre = window.open(url, "_blank", "noopener,noreferrer");
-
-      if (!nouvelleFenetre) {
-        const lien = document.createElement("a");
-        lien.href = url;
-        lien.target = "_blank";
-        lien.rel = "noopener noreferrer";
-        document.body.appendChild(lien);
-        lien.click();
-        document.body.removeChild(lien);
-      }
+      const lien = document.createElement("a");
+      lien.href = url;
+      lien.download = "";
+      document.body.appendChild(lien);
+      lien.click();
+      document.body.removeChild(lien);
 
       router.refresh();
     } finally {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FiSettings, FiBarChart2, FiUsers, FiUser } from "react-icons/fi";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
+import { BoutonDeconnexion } from "@/components/BoutonDeconnexion";
 import "@/app/(back-office)/styles/layout.css";
 
 export default async function BackOfficeLayout({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,9 @@ export default async function BackOfficeLayout({ children }: { children: React.R
           <Link href="/profil">
             <FiUser /> {utilisateur.prenom} {utilisateur.nom}
           </Link>
+          <div style={{ marginTop: 8 }}>
+            <BoutonDeconnexion />
+          </div>
         </div>
       </nav>
 

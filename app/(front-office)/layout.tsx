@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FiBookOpen, FiFileText, FiClipboard, FiCheckCircle, FiSettings, FiUser, FiLayers, FiBarChart2 } from "react-icons/fi";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
+import { BoutonDeconnexion } from "@/components/BoutonDeconnexion";
 import "@/app/(front-office)/styles/layout.css";
 
 export default async function FrontOfficeLayout({ children }: { children: React.ReactNode }) {
@@ -92,6 +93,9 @@ export default async function FrontOfficeLayout({ children }: { children: React.
           <Link href="/profil">
             <FiUser /> {utilisateur.prenom} {utilisateur.nom}
           </Link>
+          <div style={{ marginTop: 8 }}>
+            <BoutonDeconnexion />
+          </div>
         </div>
       </nav>
 
