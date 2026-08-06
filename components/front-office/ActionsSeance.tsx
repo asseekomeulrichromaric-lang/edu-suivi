@@ -54,14 +54,14 @@ export function ActionsSeance({ seanceId }: { seanceId: string }) {
           value={motif}
           onChange={(e) => setMotif(e.target.value)}
           rows={2}
-          style={{ width: "100%", marginBottom: 8 }}
+          style={{ width: "100%", marginBottom: 8, border: "1px solid var(--statut-refusee-fg)", borderRadius: 4, padding: 8, fontSize: 13, fontFamily: "var(--font-corps)" }}
         />
         {erreur && <p style={{ color: "var(--statut-refusee-fg)", fontSize: 13 }}>{erreur}</p>}
         <div style={{ display: "flex", gap: 8 }}>
-          <button className="bouton-principal" onClick={confirmerRefus} disabled={enCours}>
+          <button className="btn-refuse" onClick={confirmerRefus} disabled={enCours}>
             Confirmer le refus
           </button>
-          <button className="bouton-secondaire" onClick={() => setAfficherMotif(false)}>
+          <button className="btn-valider" onClick={() => setAfficherMotif(false)}>
             Annuler
           </button>
         </div>
@@ -70,17 +70,12 @@ export function ActionsSeance({ seanceId }: { seanceId: string }) {
   }
 
   return (
-    <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-      <button className="bouton-principal" onClick={valider} disabled={enCours}>
-        Valider
+    <div style={{ display: "flex", gap: 8 }}>
+      <button className="btn-valider" onClick={valider} disabled={enCours}>
+        VALIDER
       </button>
-      <button
-        className="bouton-secondaire"
-        style={{ borderColor: "var(--statut-refusee-fg)", color: "var(--statut-refusee-fg)" }}
-        onClick={() => setAfficherMotif(true)}
-        disabled={enCours}
-      >
-        Refuser
+      <button className="btn-refuse" onClick={() => setAfficherMotif(true)} disabled={enCours}>
+        REFUSER
       </button>
       {erreur && <p style={{ color: "var(--statut-refusee-fg)", fontSize: 13, marginLeft: 8 }}>{erreur}</p>}
     </div>

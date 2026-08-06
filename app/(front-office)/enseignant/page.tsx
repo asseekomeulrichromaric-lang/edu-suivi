@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { FiCheckSquare, FiXCircle } from "react-icons/fi";
+import { FiCheckSquare } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
+import { ActionsSeance } from "@/components/front-office/ActionsSeance";
 import "@/app/(front-office)/styles/enseignant.css";
 
 export default async function TableauDeBordEnseignant() {
@@ -83,8 +84,7 @@ export default async function TableauDeBordEnseignant() {
                       <p className="seance-contenu">{seance.contenu}</p>
                     </div>
                     <div className="seance-actions">
-                      <button className="btn-refuse"><FiXCircle /> REFUSER</button>
-                      <button className="btn-valider"><FiCheckSquare /> VALIDER</button>
+                      <ActionsSeance seanceId={seance.id} />
                     </div>
                   </div>
                 ))}

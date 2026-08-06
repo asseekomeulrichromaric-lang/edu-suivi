@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FiCheckSquare, FiCheckCircle, FiEdit3, FiAlertTriangle } from "react-icons/fi";
+import { FiCheckSquare, FiCheckCircle, FiEdit3, FiAlertTriangle, FiXCircle } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { getUtilisateurActuel } from "@/lib/utilisateur-connecte";
 import { ProgressionVolumeHoraire } from "@/components/ui/ProgressionVolumeHoraire";
@@ -36,6 +36,16 @@ export default async function TableauDeBordChefDeClasse() {
   const seancesEnAttente = await prisma.seance.findMany({
     where: {
       statut: "EN_ATTENTE",
+      fiche: { chefClasseId: utilisateur.id },
+    },
+    include: { fiche: { include: { affectation: { include: { enseignant: true, matiere: true } } } } },
+    orderBy: { date: "desc" },
+  });
+
+  // Récupérer les séances refusées (renvoyées par l'enseignant)
+  const seancesRefusees = await prisma.seance.findMany({
+    where: {
+      statut: "REFUSEE",
       fiche: { chefClasseId: utilisateur.id },
     },
     include: { fiche: { include: { affectation: { include: { enseignant: true, matiere: true } } } } },
@@ -130,6 +140,57 @@ export default async function TableauDeBordChefDeClasse() {
                         }}
                       >
                         En cours
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Séances refusées par l'enseignant */}
+          {seancesRefusees.length > 0 && (
+            <section className="section-seances">
+              <div className="section-header">
+                <h2>Séances refusées par l'enseignant</h2>
+                <span className="alert-badge" style={{ background: "var(--statut-refusee-fg)" }}>
+                  {seancesRefusees.length}
+                </span>
+              </div>
+              <div className="seances-list">
+                {seancesRefusees.map((seance) => (
+                  <div key={seance.id} className="seance-item" style={{ borderLeftColor: "var(--statut-refusee-fg)", background: "var(--statut-refusee-bg)" }}>
+                    <div className="seance-content">
+                      <p className="seance-matiere">
+                        <FiXCircle /> {seance.fiche.affectation.matiere.nom}
+                      </p>
+                      <p className="seance-time">
+                        {new Date(seance.date).toLocaleDateString("fr-FR")} •{" "}
+                        {seance.heureDebut} – {seance.heureFin}
+                      </p>
+                      <p className="seance-contenu" style={{ margin: "4px 0 0", fontSize: 12, color: "var(--ardoise)" }}>
+                        {seance.contenu}
+                      </p>
+                      {seance.motifRefus && (
+                        <p className="seance-motif-refus" style={{ margin: "8px 0 0", fontSize: 12, color: "var(--statut-refusee-fg)", fontStyle: "italic" }}>
+                          Motif du refus : {seance.motifRefus}
+                        </p>
+                      )}
+                    </div>
+                    <div className="seance-actions">
+                      <span
+                        style={{
+                          display: "inline-block",
+                          padding: "4px 10px",
+                          borderRadius: 4,
+                          fontSize: 12,
+                          fontWeight: 600,
+                          background: "var(--statut-refusee-bg)",
+                          color: "var(--statut-refusee-fg)",
+                          border: "1px solid var(--statut-refusee-fg)",
+                        }}
+                      >
+                        Refusée
                       </span>
                     </div>
                   </div>
